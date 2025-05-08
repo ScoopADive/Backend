@@ -46,6 +46,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     "logbook.apps.LogbookConfig",
     "rest_framework",
+    "django_extensions",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -54,6 +55,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 ]
 
+GRAPH_MODELS = {
+    'all_applications': True,
+    'groups': True,
+}
+
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
@@ -61,6 +67,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
         'rest_framework.pagination.PageNumberPagination',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10
 }
 
