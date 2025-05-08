@@ -1,0 +1,15 @@
+db.sqlite3
+.env
+
+# Python 관련 캐시 파일들
+__pycache__/
+*.pyc
+*.pyo
+
+# Django Migrations (모든 앱에 대한 migrations 디렉토리 제외)
+*/migrations/
+
+# Visualized Graphviz Files
+*.dot
+*.png
+
