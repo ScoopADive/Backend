@@ -2,21 +2,8 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from datetime import timedelta
 
-# Optional: 선택 가능한 값 정의
-WEATHER_CHOICES = [
-    ('sunny', 'Sunny'),
-    ('cloudy', 'Cloudy'),
-    ('rainy', 'Rainy'),
-    ('stormy', 'Stormy'),
-]
+from logbook.constants import WEATHER_CHOICES, DIVE_TYPE_CHOICES
 
-DIVE_TYPE_CHOICES = [
-    ('fun', 'Fun Dive'),
-    ('training', 'Training'),
-    ('night', 'Night Dive'),
-    ('deep', 'Deep Dive'),
-    ('wreck', 'Wreck Dive'),
-]
 
 # 보조 장비/일반 장비 분리
 class Equipment(models.Model):
@@ -31,8 +18,8 @@ class DiveCenter(models.Model):
     def __str__(self):
         return self.name
 
-class Log(models.Model):
-    dive_image = models.ImageField(upload_to='logs', null=True, blank=True)
+class Logbook(models.Model):
+    dive_image = models.ImageField(upload_to='logbooks', null=True, blank=True)
     feeling = models.TextField(null=True, blank=True)
     buddy = models.CharField(max_length=256)
     dive_title = models.CharField(max_length=256)

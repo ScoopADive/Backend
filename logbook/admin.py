@@ -1,8 +1,8 @@
 from django.contrib import admin
-from .models import Log, Equipment, DiveCenter
+from .models import Logbook, Equipment, DiveCenter
 
-@admin.register(Log)
-class LogAdmin(admin.ModelAdmin):
+@admin.register(Logbook)
+class LogbookAdmin(admin.ModelAdmin):
     list_display = (
         'dive_title', 'dive_site', 'dive_date', 'buddy',
         'max_depth', 'bottom_time', 'start_pressure', 'end_pressure'
