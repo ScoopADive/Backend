@@ -27,12 +27,8 @@ router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet)
 
-router.register(r'logbooks', views.LogbookViewSet)
-
-
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('', include(router.urls)),
-    path('docs/', include('rest_framework.urls', namespace='rest_framework')),
-    path("logbook/", include("logbook.urls")),
+    path("logbooks/", include("logbook.urls")),
 ]

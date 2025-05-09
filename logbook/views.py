@@ -1,6 +1,13 @@
-from django.http import HttpResponse
-from django.shortcuts import render
+from rest_framework import permissions, viewsets
 
-# Create your views here.
-def index(request):
-    return HttpResponse("Hello, world. You're at the logbook index.")
+from logbook.models import Logbook
+from .serializers import LogbookSerializer
+
+
+class LogbookViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = Logbook.objects.all().order_by('-dive_date')
+    serializer_class = LogbookSerializer
+    permission_classes = [permissions.IsAuthenticated]

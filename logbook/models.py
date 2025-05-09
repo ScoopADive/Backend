@@ -4,7 +4,6 @@ from datetime import timedelta
 
 from logbook.constants import WEATHER_CHOICES, DIVE_TYPE_CHOICES
 
-
 # 보조 장비/일반 장비 분리
 class Equipment(models.Model):
     name = models.CharField(max_length=100)

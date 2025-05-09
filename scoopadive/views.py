@@ -2,7 +2,7 @@ from django.contrib.auth.models import Group, User
 from rest_framework import permissions, viewsets
 
 from logbook.models import Logbook
-from .serializers import GroupSerializer, UserSerializer, LogbookSerializer
+from .serializers import GroupSerializer, UserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -22,10 +22,3 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class LogbookViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = Logbook.objects.all().order_by('-dive_date')
-    serializer_class = LogbookSerializer
-    permission_classes = [permissions.IsAuthenticated]
