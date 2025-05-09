@@ -21,18 +21,15 @@ from django.conf import settings
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework_swagger.views import get_swagger_view
-
+from rest_framework import routers
 from . import views
-
-
+from .authentication import LogoutView, CustomTokenObtainPairView
+from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
 
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet)
-
-router.register(r'logbooks', views.LogbookViewSet)
 
 
 # Swagger UI 적용
@@ -54,8 +51,14 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('', include(router.urls)),
-    path('docs/', include('rest_framework.urls', namespace='rest_framework')),
-    path("logbook/", include("logbook.urls")),
+    path("logbooks/", include("logbook.urls")),
+    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # path('api/auth/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
+
+    path('api/logout/', LogoutView.as_view(), name='auth_logout'),
+
 ]
 
 if settings.DEBUG:
