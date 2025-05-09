@@ -46,6 +46,10 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     "logbook.apps.LogbookConfig",
     "rest_framework",
+    # swagger
+    'rest_framework_swagger',
+    'drf_yasg',
+
     "django_extensions",
     "django.contrib.admin",
     "django.contrib.auth",
