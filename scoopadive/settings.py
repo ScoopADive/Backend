@@ -47,13 +47,14 @@ INSTALLED_APPS = [
     "logbook.apps.LogbookConfig",
     # auth
     "rest_framework",
+    # swagger
+    'rest_framework_swagger',
+    'drf_yasg',
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
     'dj_rest_auth',
     'dj_rest_auth.registration',
-    #d jango-allauth
     'allauth',
-
     "django_extensions",
     'django.contrib.sites',
 
