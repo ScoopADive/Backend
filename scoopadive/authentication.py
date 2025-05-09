@@ -40,15 +40,15 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
-        if self.request.data.get('all'):
-            token: OutstandingToken
-            for token in OutstandingToken.objects.filter(user=request.user):
-                _, _ = BlacklistedToken.objects.get_or_create(token=token)
-            return Response({"status": "OK, goodbye, all refresh tokens blacklisted"})
-        refresh_token = self.request.data.get('refresh_token')
-        token = RefreshToken(token=refresh_token)
-        token.blacklist()
-        return Response({"status": "OK, goodbye"})
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()  # blacklist 처리
+            return Response({"detail": "Logout successful."}, status=status.HTTP_205_RESET_CONTENT)
+        except KeyError:
+            return Response({"detail": "Refresh token required."}, status=status.HTTP_400_BAD_REQUEST)
+        except TokenError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 

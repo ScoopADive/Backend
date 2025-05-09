@@ -19,7 +19,8 @@ from django.urls import path, include
 from rest_framework import routers
 from . import views
 from .authentication import LogoutView, CustomTokenObtainPairView
-from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
+
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
@@ -32,6 +33,9 @@ urlpatterns = [
     path("logbooks/", include("logbook.urls")),
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # path('api/auth/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
+
     path('api/logout/', LogoutView.as_view(), name='auth_logout'),
 
 ]
