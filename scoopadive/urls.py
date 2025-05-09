@@ -16,19 +16,22 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework import routers, serializers, viewsets
+from rest_framework import routers
 from . import views
-
-
-
+from .authentication import LogoutView, CustomTokenObtainPairView
+from rest_framework_simplejwt.views import TokenRefreshView
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet)
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('', include(router.urls)),
     path("logbooks/", include("logbook.urls")),
+    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/logout/', LogoutView.as_view(), name='auth_logout'),
+
 ]

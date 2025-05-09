@@ -45,8 +45,18 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "logbook.apps.LogbookConfig",
+    # auth
     "rest_framework",
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt.token_blacklist',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    #d jango-allauth
+    'allauth',
+
     "django_extensions",
+    'django.contrib.sites',
+
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -64,13 +74,35 @@ REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
-        'rest_framework.pagination.PageNumberPagination',
+        # DEFAULT_PERMISSION_CLASSES를 설정하면 개별 ViewSet에 permission_classes = [...]를 따로 안 써도 됩니다.
+        # 다만 특정 ViewSet만 로그인 필요하게 만들고 싶다면 개별 설정이 더 좋습니다.
         'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        # 'scoopadive.authentication.JWTWithBlacklistAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=5),
+}
+
 
 
 MIDDLEWARE = [

@@ -1,17 +1,10 @@
 from django.contrib.auth.models import Group, User
-from rest_framework import permissions, viewsets
+from rest_framework import viewsets
 
 from logbook.models import Logbook
-from .serializers import GroupSerializer, UserSerializer
+from .serializers import GroupSerializer
 
-
-class UserViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+from rest_framework import permissions
 
 
 class GroupViewSet(viewsets.ModelViewSet):
@@ -21,4 +14,5 @@ class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all().order_by('name')
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
+
 

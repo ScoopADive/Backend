@@ -5,7 +5,7 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 
-router.register(r'', views.LogbookViewSet)
+router.register(r'', views.LogbookViewSet, basename='logbook')
 
 urlpatterns = [
     path('', include(router.urls)),

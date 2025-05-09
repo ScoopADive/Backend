@@ -1,13 +1,17 @@
 from rest_framework import permissions, viewsets
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
 
 from logbook.models import Logbook
 from .serializers import LogbookSerializer
 
 
 class LogbookViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
     queryset = Logbook.objects.all().order_by('-dive_date')
     serializer_class = LogbookSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def retrieve(self, request, pk=None):
+        logbook = get_object_or_404(Logbook, pk=pk)
+        serializer = LogbookSerializer(logbook)
+        return Response(serializer.data)
