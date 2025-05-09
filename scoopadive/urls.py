@@ -44,6 +44,7 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
+    authentication_classes=[],  # 여기를 꼭 비워야 기본 인증 안 뜸
 )
 
 

@@ -85,8 +85,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
         # 'scoopadive.authentication.JWTWithBlacklistAuthentication',
@@ -95,12 +95,26 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 
-ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
-ACCOUNT_USERNAME_REQUIRED = True
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
+# SWAGGER 세팅
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'JWT Authorization header. Example: "Bearer <your_token>"',
+        }
+    }
+}
+
+
+
+# ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
+# ACCOUNT_USERNAME_REQUIRED = True
+# ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_UNIQUE_EMAIL = True
+# ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+# ACCOUNT_EMAIL_VERIFICATION = 'optional'
 
 from datetime import timedelta
 
