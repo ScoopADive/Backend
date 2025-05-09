@@ -15,8 +15,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
-from rest_framework import routers, serializers, viewsets
+from django.urls import path, include, re_path
+from rest_framework import routers, serializers, viewsets, permissions
+from django.conf import settings
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework_swagger.views import get_swagger_view
+
 from . import views
 
 
@@ -30,9 +35,33 @@ router.register(r'groups', views.GroupViewSet)
 router.register(r'logbooks', views.LogbookViewSet)
 
 
+# Swagger UI 적용
+schema_view = get_schema_view(
+    openapi.Info(
+        title="ScoopADive API",
+        default_version='v1',
+        description="ScoopADive를 위한 유저 API 문서",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contact@snippets.local"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=[permissions.AllowAny],
+)
+
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('', include(router.urls)),
     path('docs/', include('rest_framework.urls', namespace='rest_framework')),
     path("logbook/", include("logbook.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+        re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+        re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    ]
+
