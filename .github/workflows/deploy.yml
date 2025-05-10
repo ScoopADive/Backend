@@ -40,8 +40,9 @@ jobs:
         username: ubuntu
         key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
         script: |
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
-          docker stop scoopadive || true && docker rm scoopadive || true
-          docker run -d --name scoopadive -p 8000:8000 \
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
+          sudo docker stop scoopadive || true && sudo docker rm scoopadive || true
+          sudo docker run -d --name scoopadive -p 8000:8000 \
             --env-file /home/ubuntu/.env \
             ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
+
