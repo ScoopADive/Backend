@@ -25,6 +25,8 @@ from rest_framework import routers
 from . import views
 from .authentication import LogoutView, CustomTokenObtainPairView
 from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
+from django.conf.urls.static import static
+
 
 
 # Routers provide an easy way of automatically determining the URL conf.
@@ -62,6 +64,9 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 
 if settings.DEBUG:
     urlpatterns += [

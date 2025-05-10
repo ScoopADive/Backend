@@ -68,6 +68,8 @@ INSTALLED_APPS = [
 
 SITE_ID = 1
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 GRAPH_MODELS = {
     'all_applications': True,
