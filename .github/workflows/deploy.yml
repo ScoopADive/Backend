@@ -43,6 +43,6 @@ jobs:
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
           sudo docker stop scoopadive || true && sudo docker rm scoopadive || true
           sudo docker run -d --name scoopadive -p 8000:8000 \
-            --env-file /home/ubuntu/.env \
+            --env-file /home/ubuntu/Backend/.env \
             ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
 
