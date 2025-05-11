@@ -32,6 +32,8 @@ jobs:
         context: .
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
+        build-args: |
+          --no-cache # 캐시 사용을 방지하여 항상 새로운 이미지 빌드
 
     - name: SSH and deploy to Lightsail
       uses: appleboy/ssh-action@v1.0.0
@@ -44,4 +46,5 @@ jobs:
           sudo docker stop scoopadive || true && sudo docker rm scoopadive || true
           sudo docker run -d --name scoopadive -p 8080:8000 \
             --env-file /home/ubuntu/Backend/.env \
+            --no-cache \
             ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
