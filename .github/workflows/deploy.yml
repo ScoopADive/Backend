@@ -2,7 +2,8 @@ name: Scoopadive Deploy to Lightsail
 
 on:
   push:
-    branches: [deploy]
+    branches:
+      - deploy  # deploy 브랜치에 푸시되면 실행
 
 jobs:
   deploy:
@@ -11,11 +12,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -32,8 +28,6 @@ jobs:
         context: .
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
-        build-args: |
-          --no-cache # 캐시 사용을 방지하여 항상 새로운 이미지 빌드
 
     - name: SSH and deploy to Lightsail
       uses: appleboy/ssh-action@v1.0.0
@@ -42,9 +36,19 @@ jobs:
         username: ubuntu
         key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
         script: |
+          # Docker 이미지 풀
+          echo "Pulling latest Docker image..."
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
-          sudo docker stop scoopadive || true && sudo docker rm scoopadive || true
+
+          # 기존 컨테이너 중지 및 삭제
+          echo "Stopping and removing existing container..."
+          sudo docker stop scoopadive || true
+          sudo docker rm scoopadive || true
+
+          # 새 컨테이너 실행
+          echo "Starting new container..."
           sudo docker run -d --name scoopadive -p 8080:8000 \
             --env-file /home/ubuntu/Backend/.env \
-            --no-cache \
             ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
+
+          echo "Deployment successful!"
