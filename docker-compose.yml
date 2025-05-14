@@ -11,6 +11,7 @@ services:
       - .env
     volumes:
       - .:/scoopadive
+      - static_volume:/scoopadive/staticfiles
     depends_on:
       - db
 
@@ -37,3 +38,4 @@ services:
 
 volumes:
   postgres_data:
+  static_volume:
