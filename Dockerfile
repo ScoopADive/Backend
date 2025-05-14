@@ -21,7 +21,7 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY . /scoopadive/
 
 # 정적 파일 수집 (필요시 주석 해제)
-# RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput
 
 # 포트 개방
 EXPOSE 8000
