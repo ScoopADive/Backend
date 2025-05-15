@@ -10,8 +10,7 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/scoopadive
-      - static_volume:/scoopadive/staticfiles
+      - static_volume:/scoopadive/staticfiles  # 🔹 로컬 코드 마운트 제거
     depends_on:
       - db
 
