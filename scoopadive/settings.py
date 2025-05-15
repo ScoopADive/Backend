@@ -25,7 +25,7 @@ env = environ.Env(
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Take environment variables from .env file
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+# environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY') # 기본 사용방법
@@ -185,6 +185,9 @@ WSGI_APPLICATION = "scoopadive.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+
+print('DB_PORT raw:', env('DB_PORT'))
+print('DB_PORT int:', env.int('DB_PORT'))
 
 DATABASES = {
     'default': {
