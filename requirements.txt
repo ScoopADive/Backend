@@ -12,5 +12,6 @@ django-environ==0.12.0
 drf-yasg
 dj-rest-auth
 django-allauth
+django-rest-authtoken
 django-extensions
 Pillow

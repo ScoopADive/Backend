@@ -25,7 +25,7 @@ env = environ.Env(
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Take environment variables from .env file
-# environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY') # 기본 사용방법
@@ -40,11 +40,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', '13.125.160.47']
 
-
+AUTH_USER_MODEL = 'my_user.User'
 # Application definition
 
 INSTALLED_APPS = [
     "logbook.apps.LogbookConfig",
+    "my_user.apps.MyUserConfig",
     # auth
     "rest_framework",
     # swagger
@@ -76,6 +77,15 @@ GRAPH_MODELS = {
 }
 
 REST_FRAMEWORK = {
+
+'DEFAULT_PERMISSION_CLASSES': [
+        # DEFAULT_PERMISSION_CLASSES를 설정하면 개별 ViewSet에 permission_classes = [...]를 따로 안 써도 됩니다.
+        # 다만 특정 ViewSet만 로그인 필요하게 만들고 싶다면 개별 설정이 더 좋습니다.
+        # 'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.IsAdminUser',  # 관리자만 접근 가능
+        'rest_framework.permissions.AllowAny',  # 누구나 접근 가능
+    ],
+
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',  # 이 줄 추가!
@@ -83,16 +93,12 @@ REST_FRAMEWORK = {
 
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': [
-        # DEFAULT_PERMISSION_CLASSES를 설정하면 개별 ViewSet에 permission_classes = [...]를 따로 안 써도 됩니다.
-        # 다만 특정 ViewSet만 로그인 필요하게 만들고 싶다면 개별 설정이 더 좋습니다.
-        'rest_framework.permissions.IsAuthenticated',
-    ],
+
     'DEFAULT_AUTHENTICATION_CLASSES': [
         # 'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        # 'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
         # 'scoopadive.authentication.JWTWithBlacklistAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
@@ -122,6 +128,18 @@ SWAGGER_SETTINGS = {
 # ACCOUNT_EMAIL_VERIFICATION = 'optional'
 
 from datetime import timedelta
+
+## JWT
+# 추가적인 JWT_AUTH 설젇
+JWT_AUTH = {
+    'JWT_SECRET_KEY': SECRET_KEY,
+    'JWT_ALGORITHM': 'HS256', # 암호화 알고리즘
+    'JWT_ALLOW_REFRESH': True, # refresh 사용 여부
+    'JWT_EXPIRATION_DELTA': timedelta(days=7), # 유효기간 설정
+    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=28), # JWT 토큰 갱신 유효기간
+    # import datetime 상단에 import 하기
+}
+
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),

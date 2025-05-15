@@ -21,8 +21,9 @@ from django.conf import settings
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import routers
+
+from my_user.views import CustomTokenObtainPairView
 from . import views
-from .authentication import LogoutView, CustomTokenObtainPairView
 from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
 from django.conf.urls.static import static
 
@@ -54,12 +55,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('', include(router.urls)),
     path("logbooks/", include("logbook.urls")),
-    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
-    path('api/auth/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
-
-    # path('api/logout/', LogoutView.as_view(), name='auth_logout'),
+    path("my_user/", include("my_user.urls")),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 
 ]
