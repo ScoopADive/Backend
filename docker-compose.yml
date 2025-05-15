@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   web:
-    build: .
+    image: junnie082/scoopadive:latest
     container_name: scoopadive_web
     command: gunicorn scoopadive.wsgi:application --bind 0.0.0.0:8000
     ports:

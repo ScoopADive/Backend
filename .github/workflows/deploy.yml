@@ -3,7 +3,7 @@ name: Scoopadive Deploy to Lightsail
 on:
   push:
     branches:
-      - deploy  # deploy 브랜치에 푸시되면 실행
+      - deploy
 
 jobs:
   deploy:
@@ -29,26 +29,23 @@ jobs:
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
 
-    - name: SSH and deploy to Lightsail
+    - name: SSH and deploy using docker-compose
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.LIGHTSAIL_HOST }}
         username: ubuntu
         key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
         script: |
-          # Docker 이미지 풀
-          echo "Pulling latest Docker image..."
+          echo "==> 이동: /home/ubuntu/Backend"
+          cd /home/ubuntu/Backend
+
+          echo "==> 최신 이미지 Pull"
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
 
-          # 기존 컨테이너 중지 및 삭제
-          echo "Stopping and removing existing container..."
-          sudo docker stop scoopadive || true
-          sudo docker rm scoopadive || true
+          echo "==> 기존 컨테이너 중지 및 제거"
+          sudo docker-compose down
 
-          # 새 컨테이너 실행
-          echo "Starting new container..."
-          sudo docker run -d --name scoopadive -p 8080:8000 \
-            --env-file /home/ubuntu/Backend/.env \
-            ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
+          echo "==> 최신 이미지 기반 컨테이너 다시 실행"
+          sudo docker-compose up -d
 
-          echo "Deployment successful!"
+          echo "✅ 배포 완료!"
