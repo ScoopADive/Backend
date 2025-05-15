@@ -186,17 +186,14 @@ WSGI_APPLICATION = "scoopadive.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-print('DB_PORT raw:', env('DB_PORT'))
-print('DB_PORT int:', env.int('DB_PORT'))
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_NAME'),
-        'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST'),
-        'PORT': env.int('DB_PORT'),  # 숫자형으로 변환
+        'NAME': os.environ['DB_NAME'],
+        'USER': os.environ['DB_USER'],
+        'PASSWORD': os.environ['DB_PASSWORD'],
+        'HOST': os.environ['DB_HOST'],
+        'PORT': int(os.environ['DB_PORT']),
     }
 }
 
