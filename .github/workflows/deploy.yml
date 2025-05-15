@@ -48,4 +48,7 @@ jobs:
           echo "==> 최신 이미지 기반 컨테이너 다시 실행"
           sudo docker-compose up -d
 
-          echo "✅ 배포 완료!"
+          echo "==> 마이그레이션 실행"
+          sudo docker-compose exec -T web python manage.py migrate
+
+          echo "✅ 배포 및 마이그레이션 완료!"
