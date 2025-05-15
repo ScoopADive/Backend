@@ -36,7 +36,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY') # 기본 사용방법
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', '13.125.160.47']
 
