@@ -56,12 +56,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path("logbooks/", include("logbook.urls")),
     path("my_user/", include("my_user.urls")),
-    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
-    path('api/auth/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
-
-    # path('api/logout/', LogoutView.as_view(), name='auth_logout'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 
 ]
