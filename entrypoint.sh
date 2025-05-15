@@ -1,10 +1,13 @@
-#!/bin/sh
+#!/bin/bash
+set -e
 
-echo "Apply database migrations"
+cd /scoopadive
+
+# 예: DB 마이그레이션
 python manage.py migrate
 
-echo "Collect static files"
+# 정적 파일 수집 (필요시)
 python manage.py collectstatic --noinput
 
-echo "Start Gunicorn"
-gunicorn scoopadive.wsgi:application --bind 0.0.0.0:8000
+# Gunicorn 실행
+exec gunicorn scoopadive.wsgi:application --bind 0.0.0.0:8000
