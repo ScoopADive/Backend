@@ -13,3 +13,4 @@ drf-yasg
 dj-rest-auth
 django-allauth
 django-extensions
+Pillow
