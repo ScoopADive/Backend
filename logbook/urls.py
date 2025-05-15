@@ -10,3 +10,4 @@ router.register(r'', views.LogbookViewSet, basename='logbook')
 urlpatterns = [
     path('', include(router.urls)),
 ]
+

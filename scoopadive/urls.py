@@ -20,11 +20,12 @@ from rest_framework import routers, serializers, viewsets, permissions
 from django.conf import settings
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from rest_framework_swagger.views import get_swagger_view
 from rest_framework import routers
 from . import views
 from .authentication import LogoutView, CustomTokenObtainPairView
 from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
+from django.conf.urls.static import static
+
 
 
 # Routers provide an easy way of automatically determining the URL conf.
@@ -44,6 +45,7 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
+    authentication_classes=[],  # 여기를 꼭 비워야 기본 인증 안 뜸
 )
 
 
@@ -55,16 +57,20 @@ urlpatterns = [
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    # path('api/auth/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
+    path('api/auth/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
 
-    path('api/logout/', LogoutView.as_view(), name='auth_logout'),
+    # path('api/logout/', LogoutView.as_view(), name='auth_logout'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 
 ]
 
-if settings.DEBUG:
-    urlpatterns += [
-        re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-        re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-        re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    ]
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# swagger
+urlpatterns += [
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+]
 
