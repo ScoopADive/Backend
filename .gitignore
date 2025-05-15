@@ -6,10 +6,12 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Django Migrations (모든 앱에 대한 migrations 디렉토리 제외)
-*/migrations/
+# Django Migrations — init 파일은 포함하고, 나머지만 제외
+**/migrations/*.pyc
+**/migrations/*.pyo
+**/migrations/__pycache__/
+!**/migrations/__init__.py
 
 # Visualized Graphviz Files
 *.dot
 *.png
-
