@@ -50,6 +50,9 @@ INSTALLED_APPS = [
     "rest_framework",
     # swagger
     'drf_yasg',
+    # cors
+    'corsheaders'
+    
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
     'dj_rest_auth',
@@ -178,6 +181,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # cors
+    'corsheaders.middleware.CorsMiddleware',
+
 ]
 
 ROOT_URLCONF = "scoopadive.urls"
