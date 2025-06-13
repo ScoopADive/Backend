@@ -17,6 +17,8 @@ services:
       - static_volume:/scoopadive/staticfiles
     depends_on:
       - db
+    networks:
+      - scoopadive_network
 
   nginx:
     image: nginx:latest
@@ -28,6 +30,8 @@ services:
       - static_volume:/scoopadive/staticfiles
     depends_on:
       - web
+    networks:
+      - scoopadive_network
 
   db:
     image: postgres:13
@@ -38,7 +42,13 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - scoopadive_network
 
 volumes:
   postgres_data:
   static_volume:
+
+networks:
+  scoopadive_network:
+    driver: bridge
