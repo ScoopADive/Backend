@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     # swagger
     'drf_yasg',
     # cors
-    'corsheaders'
+    'corsheaders',
     
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
@@ -185,6 +185,8 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = "scoopadive.urls"
 
