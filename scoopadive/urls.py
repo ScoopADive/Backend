@@ -33,7 +33,6 @@ from django.conf.urls.static import static
 router = routers.DefaultRouter()
 router.register(r'groups', views.GroupViewSet)
 
-
 # Swagger UI 적용
 schema_view = get_schema_view(
     openapi.Info(
@@ -49,15 +48,14 @@ schema_view = get_schema_view(
     authentication_classes=[],  # 여기를 꼭 비워야 기본 인증 안 뜸
 )
 
-
-
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('', include(router.urls)),
     path("logbooks/", include("logbook.urls")),
     path("auths/", include("auths.urls")),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('mypage/', include("mypage.urls")),
 
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
