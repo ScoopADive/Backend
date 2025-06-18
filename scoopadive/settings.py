@@ -40,13 +40,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', '13.125.160.47']
 
-AUTH_USER_MODEL = 'my_user.User'
+AUTH_USER_MODEL = 'auths.User'
 # Application definition
 
 INSTALLED_APPS = [
     "logbook.apps.LogbookConfig",
-    "my_user.apps.MyUserConfig",
-    # auth
+    "auths.apps.AuthsConfig",
+    # auths
     "rest_framework",
     # swagger
     'drf_yasg',
@@ -94,15 +94,15 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',  # 이 줄 추가!
     ],
 
-    # Use Django's standard `django.contrib.auth` permissions,
+    # Use Django's standard `django.contrib.auths` permissions,
     # or allow read-only access for unauthenticated users.
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework.authentication.BasicAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.auths.BasicAuthentication',
+        # 'rest_framework.auths.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
-        # 'scoopadive.authentication.JWTWithBlacklistAuthentication',
+        # 'scoopadive.auths.JWTWithBlacklistAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
@@ -161,7 +161,7 @@ SIMPLE_JWT = {
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
-    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.auths.default_user_authentication_rule',
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
     'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
@@ -229,16 +229,16 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auths.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": "django.contrib.auths.password_validation.MinimumLengthValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME": "django.contrib.auths.password_validation.CommonPasswordValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME": "django.contrib.auths.password_validation.NumericPasswordValidator",
     },
 ]
 
