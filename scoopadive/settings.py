@@ -40,13 +40,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', '13.125.160.47']
 
-AUTH_USER_MODEL = 'my_user.User'
+AUTH_USER_MODEL = 'auths.User'
 # Application definition
 
 INSTALLED_APPS = [
     "logbook.apps.LogbookConfig",
-    "my_user.apps.MyUserConfig",
-    # auth
+    "auths.apps.AuthsConfig",
+    "mypage.apps.MypageConfig",
+    # auths
     "rest_framework",
     # swagger
     'drf_yasg',
@@ -94,14 +95,14 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',  # 이 줄 추가!
     ],
 
-    # Use Django's standard `django.contrib.auth` permissions,
+    # Use Django's standard `django.contrib.auths` permissions,
     # or allow read-only access for unauthenticated users.
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
         # 'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        # 'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        # 'dj_rest_auth.authentication.JWTCookieAuthentication',
         # 'scoopadive.authentication.JWTWithBlacklistAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',

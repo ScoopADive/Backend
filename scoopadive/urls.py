@@ -22,7 +22,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import routers
 
-from my_user.views import CustomTokenObtainPairView
+from auths.views import CustomTokenObtainPairView
 from . import views
 from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
 from django.conf.urls.static import static
@@ -32,7 +32,6 @@ from django.conf.urls.static import static
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
 router.register(r'groups', views.GroupViewSet)
-
 
 # Swagger UI 적용
 schema_view = get_schema_view(
@@ -49,15 +48,14 @@ schema_view = get_schema_view(
     authentication_classes=[],  # 여기를 꼭 비워야 기본 인증 안 뜸
 )
 
-
-
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('', include(router.urls)),
     path("logbooks/", include("logbook.urls")),
-    path("my_user/", include("my_user.urls")),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path("auths/", include("auths.urls")),
+    path('mypage/', include("mypage.urls")),
 
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

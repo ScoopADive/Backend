@@ -46,6 +46,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(
         max_length=30,
     )
+    country = models.CharField(
+        max_length=20,
+    )
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,
@@ -75,3 +78,4 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.email
+
