@@ -14,7 +14,6 @@ class LogbookViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser]  # 이미지 업로드를 위해 필요
 
-
     def retrieve(self, request, pk=None):
         logbook = get_object_or_404(Logbook, pk=pk)
         serializer = LogbookSerializer(logbook)
