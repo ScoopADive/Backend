@@ -220,6 +220,9 @@ DATABASES = {
         'PASSWORD': os.environ['DB_PASSWORD'],
         'HOST': os.environ['DB_HOST'],
         'PORT': int(os.environ['DB_PORT']),
+        'OPTIONS': {
+            'options': '-c search_path=public'
+        },
     }
 }
 
