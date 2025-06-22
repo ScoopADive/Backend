@@ -3,7 +3,9 @@ from django.core.exceptions import ValidationError
 from datetime import timedelta
 
 from logbook.constants import WEATHER_CHOICES, DIVE_TYPE_CHOICES
+from scoopadive import settings
 
+User = settings.AUTH_USER_MODEL
 # 보조 장비/일반 장비 분리
 class Equipment(models.Model):
     name = models.CharField(max_length=100)
@@ -18,9 +20,10 @@ class DiveCenter(models.Model):
         return self.name
 
 class Logbook(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     dive_image = models.ImageField(upload_to='logbooks', null=True, blank=True)
     feeling = models.TextField(null=True, blank=True)
-    buddy = models.CharField(max_length=256)
+    buddy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='logbooks')
     dive_title = models.CharField(max_length=256)
     dive_site = models.CharField(max_length=256)
     dive_date = models.DateField()
