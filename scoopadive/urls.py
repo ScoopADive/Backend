@@ -22,9 +22,8 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import routers
 
-from auths.views import CustomTokenObtainPairView
+import home
 from . import views
-from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
 from django.conf.urls.static import static
 
 
@@ -51,6 +50,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('', include(router.urls)),
+    path("home/", include("home.urls")),
     path("logbooks/", include("logbook.urls")),
     path("auths/", include("auths.urls")),
     path('mypage/', include("mypage.urls")),

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "logbook.apps.LogbookConfig",
     "auths.apps.AuthsConfig",
     "mypage.apps.MypageConfig",
+    "home.apps.HomeConfig",
     # auths
     "rest_framework",
     # swagger

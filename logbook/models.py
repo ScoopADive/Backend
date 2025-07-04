@@ -36,7 +36,7 @@ class Logbook(models.Model):
     start_pressure = models.PositiveSmallIntegerField()
     end_pressure = models.PositiveSmallIntegerField()
     dive_center = models.ForeignKey(DiveCenter, on_delete=models.SET_NULL, null=True, blank=True)
-    likes = models.ManyToManyField(User, related_name="likes", blank=True)
+    likes = models.ManyToManyField(User, related_name="liked_logbooks", blank=True)
 
     def total_likes(self):
         return self.likes.count()

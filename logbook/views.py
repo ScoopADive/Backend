@@ -3,6 +3,7 @@ from rest_framework.parsers import MultiPartParser
 
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from logbook.models import Logbook
 from .serializers import LogbookSerializer
@@ -18,3 +19,12 @@ class LogbookViewSet(viewsets.ModelViewSet):
         logbook = get_object_or_404(Logbook, pk=pk)
         serializer = LogbookSerializer(logbook)
         return Response(serializer.data)
+
+class LogbookLikesAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        logbook = get_object_or_404(Logbook, pk=pk)
+        logbook_likes = logbook.likes.all()
+        return Response({'likes': logbook_likes})
+

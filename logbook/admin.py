@@ -5,7 +5,8 @@ from .models import Logbook, Equipment, DiveCenter
 class LogbookAdmin(admin.ModelAdmin):
     list_display = (
         'dive_title', 'dive_site', 'dive_date', 'buddy',
-        'max_depth', 'bottom_time', 'start_pressure', 'end_pressure'
+        'max_depth', 'bottom_time', 'start_pressure', 'end_pressure',
+        'likes'
     )
     list_filter = (
         'dive_date', 'weather', 'type_of_dive', 'dive_center',
@@ -18,7 +19,7 @@ class LogbookAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('기본 정보', {
-            'fields': ('dive_title', 'dive_site', 'dive_date', 'buddy', 'feeling', 'dive_image')
+            'fields': ('dive_title', 'dive_site', 'dive_date', 'buddy', 'feeling', 'dive_image', 'likes')
         }),
         ('다이브 상세', {
             'fields': ('max_depth', 'bottom_time', 'start_pressure', 'end_pressure', 'weight')
@@ -33,6 +34,11 @@ class LogbookAdmin(admin.ModelAdmin):
             minutes = obj.bottom_time.total_seconds() // 60
             return f"{int(minutes)} min"
         return "-"
+
+    def likes(self, obj):
+        return ", ".join([user.username for user in obj.likes.all()])
+    likes.short_description = 'Likes'
+
 
 
 @admin.register(Equipment)
