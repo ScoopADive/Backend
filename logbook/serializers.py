@@ -7,4 +7,3 @@ class LogbookSerializer(serializers.ModelSerializer):
         model = Logbook
         fields = '__all__'
 
-
