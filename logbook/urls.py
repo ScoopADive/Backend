@@ -10,6 +10,10 @@ router.register(r'', views.LogbookViewSet, basename='logbook')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('<int:id>/likes', views.LogbookLikesAPIView.as_view(), name='logbook-likes'),
+    path('likes/all/', views.LogbookLikesAllAPIView.as_view(), name='logbook-likes-all'),
+
+    path('likes/<int:id>', views.LogbookLikesAPIView.as_view(), name='logbook-likes'),
+
+
 ]
 
