@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
+from rest_framework.response import Response
 
 from logbook.serializers import LogbookSerializer
 from mypage.models import BucketList, Friend
@@ -15,17 +16,22 @@ class BucketListSerializer(serializers.ModelSerializer):
 
 class FriendSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Friend
-        fields = ['user', 'friend']
+        model = User
+        fields = ['id', 'username', 'email']
 
 class UserDetailSerializer(serializers.ModelSerializer):
     bucketlists = BucketListSerializer(many=True, read_only=True)
-    logbooks = LogbookSerializer(many=True, read_only=True)
+    own_logbooks = LogbookSerializer(many=True, read_only=True)
+    friends = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['email', 'username', 'country', 'date_joined', 'bucketlists', 'logbooks']
-        read_only_fields = ['date_joined', 'bucketlists', 'logbooks']
+        fields = ['id', 'email', 'username', 'country', 'date_joined', 'bucketlists', 'own_logbooks', 'friends']
+        read_only_fields = ['date_joined', 'bucketlists', 'own_logbooks']
+
+    def get_friends(self, obj):
+        friend_ids = Friend.objects.filter(user=obj).values_list('friend_id', flat=True)
+        return list(friend_ids)
 
     def validate_email(self, value):
         try:
