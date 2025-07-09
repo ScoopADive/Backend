@@ -20,14 +20,15 @@ class DiveCenter(models.Model):
         return self.name
 
 class Logbook(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='own_logbooks')
-    dive_image = models.ImageField(upload_to='logbooks', null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='own_logbooks')
+    dive_image = models.ImageField(upload_to='logbooks_images', null=True, blank=True)
     feeling = models.TextField(null=True, blank=True)
     buddy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='buddy_logbooks')
+    # buddy = models.TextField(null=True, blank=True)
     dive_title = models.CharField(max_length=256)
     dive_site = models.CharField(max_length=256)
     dive_date = models.DateField()
-    max_depth = models.FloatField(null=True, blank=True)
+    max_depth = models.FloatField()
     bottom_time = models.DurationField(help_text="예: 00:35:00 (35분)")
     weather = models.CharField(max_length=100, choices=WEATHER_CHOICES, null=True, blank=True)
     type_of_dive = models.CharField(max_length=256, choices=DIVE_TYPE_CHOICES, null=True, blank=True)
