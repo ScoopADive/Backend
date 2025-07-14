@@ -19,23 +19,37 @@ class FriendSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email']
 
+
+
 class UserDetailSerializer(serializers.ModelSerializer):
+    profile_image = serializers.ImageField(required=False)
     bucketlists = BucketListSerializer(many=True, read_only=True)
     own_logbooks = LogbookSerializer(many=True, read_only=True)
     friends = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'country', 'date_joined', 'bucketlists', 'own_logbooks', 'friends']
+        fields = [
+            'id', 'profile_image', 'email', 'username', 'country',
+            'date_joined', 'bucketlists', 'own_logbooks', 'friends'
+        ]
         read_only_fields = ['date_joined', 'bucketlists', 'own_logbooks']
 
     def get_friends(self, obj):
         friend_ids = Friend.objects.filter(user=obj).values_list('friend_id', flat=True)
         return list(friend_ids)
 
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    profile_image = serializers.ImageField(required=False)
+
+    class Meta:
+        model = User
+        fields = ['profile_image', 'username', 'email', 'country', 'license', 'introduction']
+
     def validate_email(self, value):
         try:
-            validate_email(value)  # ✅ 올바른 Django 유효성 검사 함수 사용
+            validate_email(value)
         except DjangoValidationError:
             raise serializers.ValidationError("유효한 이메일 주소를 입력하세요.")
         return value
