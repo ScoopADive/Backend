@@ -2,7 +2,6 @@ from rest_framework import permissions, viewsets, status
 from rest_framework.parsers import MultiPartParser
 
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -25,6 +24,13 @@ class LogbookViewSet(viewsets.ModelViewSet):
         serializer = LogbookSerializer(logbooks, many=True)
         return Response(serializer.data)
 
+    def create(self, request, *args, **kwargs):
+        serializer = LogbookSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(user=self.request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def retrieve(self, request, pk=None):
         logbook = get_object_or_404(Logbook, pk=pk)
         serializer = LogbookSerializer(logbook)
@@ -42,8 +48,6 @@ class LogbookViewSet(viewsets.ModelViewSet):
 class LogbookLikesAllAPIView(APIView):
     authentication_classes = []
     permission_classes = [permissions.AllowAny]  # 권한 확인도 안 함
-
-    print("LogbookLikesAllAPIView")
 
     def get(self, request):
         logbooks = Logbook.objects.all()
