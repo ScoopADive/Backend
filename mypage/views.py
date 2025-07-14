@@ -1,11 +1,11 @@
 from django.contrib.auth import get_user_model
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import BucketList, Friend
-from .serializers import UserDetailSerializer, BucketListSerializer, FriendSerializer
+from .serializers import UserDetailSerializer, BucketListSerializer, UserUpdateSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -93,33 +93,22 @@ class FriendsDetailView(APIView):
 
         return Response({'message': '친구 삭제 완료'}, status=status.HTTP_204_NO_CONTENT)
 
-
-# class FriendDetailView(viewsets.ModelViewSet):
-#     queryset = Friend.objects.all().order_by('created_at')
-#     serializer_class = FriendSerializer
-#     permission_classes = [IsAuthenticated]
-#     parser_classes = [MultiPartParser]
-#
-#     def retrieve(self, request, pk=None):
-#         friend = get_object_or_404(Friend, pk=pk)
-#         serializer = FriendSerializer(friend)
-#         return Response(serializer.data)
-
-
-
-class EditUserView(APIView):
+class EditProfileView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
 
-    @swagger_auto_schema(request_body=UserDetailSerializer)
+    @swagger_auto_schema(
+        request_body=UserUpdateSerializer,
+        consumes=['multipart/form-data']
+    )
     def put(self, request, pk):
         user = get_object_or_404(User, pk=pk)
 
         if request.user != user:
             return Response({'detail': '수정 권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
 
-        # partial=True로 하면 request.data에 없는 필드는 기존 값 유지
-        serializer = UserDetailSerializer(user, data=request.data, partial=True)
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(UserDetailSerializer(user).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

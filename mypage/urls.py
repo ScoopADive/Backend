@@ -1,7 +1,7 @@
 from django.urls import path
 
-from .models import Friend
-from .views import MyPageView, BucketListDetailView, EditUserView, FriendsListAPIView, FriendsDetailView, ListUsersView
+from .views import MyPageView, BucketListDetailView, FriendsListAPIView, FriendsDetailView, ListUsersView, \
+    EditProfileView
 
 urlpatterns = [
     path('', MyPageView.as_view(), name='mypage'),
@@ -10,6 +10,6 @@ urlpatterns = [
     path('friends/list/', FriendsListAPIView.as_view(), name='friends'),
 
     path('friends/detail/<int:id>/', FriendsDetailView.as_view(), name='friends-detail'),
-    path('edit_profile/<int:id>/', EditUserView.as_view(), name='mypage-edit'),
+    path('edit_profile/<int:id>/', EditProfileView.as_view(), name='mypage-edit'),
 ]
 
