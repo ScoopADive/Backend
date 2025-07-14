@@ -34,22 +34,10 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    """
-    customized User
-    """
-    email = models.EmailField(
-        verbose_name=_('email id'),
-        max_length=64,
-        unique=True,
-        help_text='EMAIL ID.'
-    )
-    username = models.CharField(
-        max_length=30,
-    )
-    country = models.CharField(
-        max_length=20,
-    )
-
+    profile_image = models.ImageField(upload_to='profile_image', null=True, blank=True)
+    username = models.CharField(max_length=30)
+    email = models.EmailField(verbose_name=_('email id'), max_length=64, unique=True, help_text='EMAIL ID.')
+    country = models.CharField(max_length=20)
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,
@@ -64,9 +52,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         ),
     )
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
-
+    license = models.CharField(null=True, blank=True, max_length=255)
+    introduction = models.TextField(null=True, blank=True)
     objects = UserManager()
-
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
 
