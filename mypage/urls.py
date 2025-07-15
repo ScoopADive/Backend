@@ -1,12 +1,16 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
-from .views import MyPageView, BucketListDetailView, FriendsListAPIView, FriendsDetailView, ListUsersView, \
+from .views import MyPageView, BucketListViewSet, FriendsListAPIView, FriendsDetailView, ListUsersView, \
     EditProfileView
 
+router = DefaultRouter()
+router.register(r'bucketlists', BucketListViewSet, basename='bucketlists')
 urlpatterns = [
+    path('', include(router.urls)),
     path('', MyPageView.as_view(), name='mypage'),
     path('all/', ListUsersView.as_view(), name='mypage-all'),
-    path('bucketlist/<int:id>/', BucketListDetailView.as_view({'get': 'retrieve'}), name='bucketlist-detail'),
+
     path('friends/list/', FriendsListAPIView.as_view(), name='friends'),
 
     path('friends/detail/<int:id>/', FriendsDetailView.as_view(), name='friends-detail'),

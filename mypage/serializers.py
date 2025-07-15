@@ -12,7 +12,7 @@ User = get_user_model()
 class BucketListSerializer(serializers.ModelSerializer):
     class Meta:
         model = BucketList
-        fields = ['id', 'title']
+        fields = '__all__'
 
 class FriendSerializer(serializers.ModelSerializer):
     class Meta:
