@@ -1,10 +1,10 @@
-from logbook.models import Logbook
 from rest_framework import serializers
+from home.models import Job
 
 
-class LogbookSerializer(serializers.ModelSerializer):
+class JobSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Logbook
+        model = Job
         fields = '__all__'
         read_only_fields = ['user']
 
