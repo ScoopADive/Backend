@@ -30,16 +30,11 @@ class ListUsersView(APIView):
         serializer = UserDetailSerializer(users, many=True)
         return Response(serializer.data)
 
-class BucketListDetailView(viewsets.ModelViewSet):
+class BucketListViewSet(viewsets.ModelViewSet):
     queryset = BucketList.objects.all().order_by('created_at')
     serializer_class = BucketListSerializer
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]  # 이미지 업로드를 위해 필요
-
-    def retrieve(self, request, pk=None):
-        bucketlist = get_object_or_404(BucketList, pk=pk)
-        serializer = BucketListSerializer(bucketlist)
-        return Response(serializer.data)
 
 class FriendsListAPIView(APIView):
     permission_classes = [IsAuthenticated]
