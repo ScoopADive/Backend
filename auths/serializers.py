@@ -11,7 +11,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'username', 'password', 'country')
+        fields = ('id', 'email', 'username', 'password', 'country')
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
@@ -29,6 +29,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         # 로그인 응답에 이메일, username 추가
         data.update({
+            'id': self.user.id,
             'email': self.user.email,
             'username': self.user.username,
             'country': self.user.country,
