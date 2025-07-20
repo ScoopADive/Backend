@@ -6,12 +6,9 @@ from rest_framework import routers
 router = routers.DefaultRouter()
 
 router.register(r'', views.LogbookViewSet, basename='logbook')
-
-# router.register(r'likes', views.LogbookLikesViewSet, basename='logbook-likes')
-
 urlpatterns = [
     path('', include(router.urls)),
-
-    # path('likes/<int:id>', views.LogbookLikesAPIView.as_view(), name='logbook-likes'),
+    path('<int:logbook_id>/comments', views.CommentAPIView.as_view(), name='comments'),
+    path('<int:logbook_id>/uncomment/<comment_id>', views.UncommentAPIView.as_view(), name='comment-delete'),
 ]
 

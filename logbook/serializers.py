@@ -1,4 +1,4 @@
-from logbook.models import Logbook
+from logbook.models import Logbook, Comment
 from rest_framework import serializers
 
 
@@ -17,3 +17,9 @@ class LogbookLikeSerializer(serializers.ModelSerializer):
         model = Logbook
         fields = ('likes',)
 
+class CommentSerializer(serializers.ModelSerializer):
+    author_username = serializers.CharField(source='author.username', read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'text', 'author_username', 'created_at']

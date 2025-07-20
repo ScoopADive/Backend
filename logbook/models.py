@@ -6,7 +6,7 @@ from logbook.constants import WEATHER_CHOICES, DIVE_TYPE_CHOICES
 from scoopadive import settings
 
 User = settings.AUTH_USER_MODEL
-# 보조 장비/일반 장비 분리
+
 class Equipment(models.Model):
     name = models.CharField(max_length=100)
 
@@ -53,3 +53,12 @@ class Logbook(models.Model):
 
     def __str__(self):
         return f"{self.dive_title} @ {self.dive_site} ({self.dive_date})"
+
+class Comment(models.Model):
+    logbook = models.ForeignKey(Logbook, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.logbook} @ {self.user}"
