@@ -6,10 +6,11 @@ from rest_framework.views import APIView
 from auths.models import User
 from home.models import Job
 from home.serializers import JobSerializer
+from logbook.models import Logbook
 
 
 # Create your views here.
-class TopLevelMembersList(APIView):
+class TopLevelMembersListAPIView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -47,3 +48,19 @@ class JobViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_403_FORBIDDEN)
 
 
+class TheMostVisitedSpotsAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        logbooks = Logbook.objects.all()
+        visited_spots = {}
+        for logbook in logbooks:
+            if logbook.dive_site not in visited_spots:
+                visited_spots[logbook.dive_site] = 1
+            else:
+                visited_spots[logbook.dive_site] += 1
+
+        sorted_dict = sorted(visited_spots.items(), reverse=True, key=lambda item: item[1])
+        print(sorted_dict[:3])
+
+        return Response(sorted_dict[:3])
