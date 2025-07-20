@@ -48,13 +48,16 @@ INSTALLED_APPS = [
     "auths.apps.AuthsConfig",
     "mypage.apps.MypageConfig",
     "home.apps.HomeConfig",
+    "search.apps.SearchConfig",
     # auths
     "rest_framework",
     # swagger
     'drf_yasg',
     # cors
     'corsheaders',
-    
+    # elasticsearch
+    'django_elasticsearch_dsl',
+
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
     'dj_rest_auth',
@@ -123,6 +126,12 @@ SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,  # 세션 기반 인증 비활성화
 }
 
+# Elasticsearch DSL 설정
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'http://localhost:9200'  # or your Docker host
+    },
+}
 
 
 # ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
