@@ -34,6 +34,12 @@ class LogbookViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['get'])
+    def my_logbooks(self, request):
+        logbooks = Logbook.objects.filter(user=self.request.user)
+        serializer = LogbookSerializer(logbooks, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
     def get_likes(self, request):
         data = [
             {
@@ -100,14 +106,6 @@ class CommentAPIView(generics.CreateAPIView):
                 text=comment_text,
                 author=request.user
             )
-
-class MyLogbooksAPIView(generics.ListAPIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def list(self, request):
-        logbooks = Logbook.objects.filter(user=request.user)
-        serializer = LogbookSerializer(logbooks, many=True)
-        return Response(serializer.data)
 
 class UncommentAPIView(APIView):
     queryset = Comment.objects.all().order_by('created_at')
