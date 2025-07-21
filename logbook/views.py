@@ -101,6 +101,13 @@ class CommentAPIView(generics.CreateAPIView):
                 author=request.user
             )
 
+class MyLogbooksAPIView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request):
+        logbooks = Logbook.objects.filter(user=request.user)
+        serializer = LogbookSerializer(logbooks, many=True)
+        return Response(serializer.data)
 
 class UncommentAPIView(APIView):
     queryset = Comment.objects.all().order_by('created_at')
