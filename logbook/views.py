@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from auths.models import User
 from logbook.models import Logbook, Comment
 from .serializers import LogbookSerializer, LogbookLikeSerializer, CommentSerializer
 
@@ -69,6 +70,15 @@ class LogbookViewSet(viewsets.ModelViewSet):
         return Response({'status': f'Unliked logbook {pk}'}, status=status.HTTP_204_NO_CONTENT)
 
 
+class FriendLogbookAPIView(APIView):
+    serializer_class = LogbookSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, user_id=None):
+        user = User.objects.get(id=user_id)
+        logbooks = Logbook.objects.filter(user=user)
+        serializer = LogbookSerializer(logbooks, many=True)
+        return Response(serializer.data)
 
 class CommentAPIView(generics.CreateAPIView):
     queryset = Comment.objects.all().order_by('created_at')
