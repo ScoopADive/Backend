@@ -2,10 +2,12 @@ from django.contrib.auth import get_user_model
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from .models import BucketList, Friend
-from .serializers import UserDetailSerializer, BucketListSerializer, UserUpdateSerializer
+from .models import BucketList, Friend, SkillSet
+from .serializers import UserDetailSerializer, BucketListSerializer, UserUpdateSerializer, \
+    SkillSetSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -107,3 +109,24 @@ class EditProfileView(APIView):
             serializer.save()
             return Response(UserDetailSerializer(user).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MySkillsViewSet(viewsets.ModelViewSet):
+    serializer_class = SkillSetSerializer
+    queryset = SkillSet.objects.all()
+
+    def get_permissions(self):
+        if self.action == 'get_friend_skills':
+            return [AllowAny()]
+        else:
+            return [IsAuthenticated()]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=False, methods=['get'], url_path='friends/(?P<user_id>[^/.]+)')
+    def get_friend_skills(self, request, user_id=None):
+        user = User.objects.get(pk=user_id)
+        skills = SkillSet.objects.filter(user=user)
+        serializer = SkillSetSerializer(skills, many=True)
+        return Response(serializer.data)

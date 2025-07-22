@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 
 from logbook.serializers import LogbookSerializer
-from mypage.models import BucketList, Friend
+from mypage.models import BucketList, Friend, SkillSet
 
 User = get_user_model()
 
@@ -18,7 +18,6 @@ class FriendSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
-
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
@@ -63,3 +62,9 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         if not value.isalpha():
             raise serializers.ValidationError("국가명은 알파벳만 포함해야 합니다.")
         return value
+
+class SkillSetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SkillSet
+        fields = '__all__'
+        read_only_fields = ['user']

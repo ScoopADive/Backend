@@ -3,6 +3,8 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, Permis
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from auths.choices import License_Choices
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -52,7 +54,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         ),
     )
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
-    license = models.CharField(null=True, blank=True, max_length=255)
+    license = models.CharField(null=True, blank=True, choices=License_Choices, max_length=100)
+    dive_count = models.IntegerField(default=0)
     introduction = models.TextField(null=True, blank=True)
     objects = UserManager()
     EMAIL_FIELD = 'email'

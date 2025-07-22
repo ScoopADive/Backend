@@ -64,3 +64,9 @@ class TheMostVisitedSpotsAPIView(APIView):
         print(sorted_dict[:3])
 
         return Response(sorted_dict[:3])
+
+
+
+
+
+
