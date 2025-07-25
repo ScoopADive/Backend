@@ -1,10 +1,11 @@
 # auths/views.py
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
-from .serializers import UserCreateSerializer
+from .serializers import UserCreateSerializer, LogoutSerializer
 from .serializers import CustomTokenObtainPairSerializer  # 후술
 from rest_framework.views import APIView
 
@@ -24,6 +25,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @swagger_auto_schema(request_body=LogoutSerializer)
     def post(self, request):
         try:
             refresh_token = request.data["refresh"]

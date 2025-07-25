@@ -35,3 +35,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'country': self.user.country,
         })
         return data
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField(help_text="Refresh token to be blacklisted.")
