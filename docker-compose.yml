@@ -15,7 +15,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./:/scoopadive      # 로컬 프로젝트 마운트
+      - /home/ubuntu/Backend:/scoopadive
       - static_volume:/scoopadive/staticfiles
     depends_on:
       - db
