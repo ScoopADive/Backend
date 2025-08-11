@@ -49,13 +49,13 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('', include(router.urls)),
-    path("home/", include("home.urls")),
-    path("logbooks/", include("logbook.urls")),
-    path("auths/", include("auths.urls")),
-    path('mypage/', include("mypage.urls")),
-    path('search/', include("search.urls")),
-
+    path('api/', include([
+        path('home/', include('home.urls')),
+        path('logbooks/', include('logbook.urls')),
+        path('auths/', include('auths.urls')),
+        path('mypage/', include('mypage.urls')),
+        path('search/', include('search.urls')),
+    ])),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
 
