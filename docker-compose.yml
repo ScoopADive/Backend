@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+
   web:
     image: junnie082/scoopadive:latest
     container_name: scoopadive_web
@@ -14,6 +15,7 @@ services:
     env_file:
       - .env
     volumes:
+      - /home/ubuntu/Backend:/scoopadive
       - static_volume:/scoopadive/staticfiles
     depends_on:
       - db
