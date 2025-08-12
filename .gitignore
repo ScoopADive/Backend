@@ -1,5 +1,6 @@
 db.sqlite3
 .env
+secrets.json
 
 # Python 관련 캐시 파일들
 __pycache__/
