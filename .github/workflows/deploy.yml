@@ -38,9 +38,19 @@ jobs:
         host: ${{ secrets.LIGHTSAIL_HOST }}
         username: ubuntu
         key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+        
         script: |
           echo "==> 이동: /home/ubuntu/Backend"
           cd /home/ubuntu/Backend
+
+          echo "==> 환경 변수 파일 생성"
+          cat <<EOF > .env
+          GOOGLE_CLIENT_ID=${{ secrets.CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
+          GOOGLE_REDIRECT=${{ secrets.AUTH_URI }}
+          GOOGLE_CALLBACK_URI=${{ secrets.REDIRECT_URIS }}
+          EOF
+
 
           echo "==> 최신 이미지 Pull"
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
