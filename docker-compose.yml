@@ -29,11 +29,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /home/ubuntu/Backend/nginx.conf:/etc/nginx/conf.d/default.conf
-      - /home/ubuntu/Frontend/dist:/usr/share/nginx/html  # React 빌드 결과물
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /home/ubuntu/Backend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /home/ubuntu/Frontend/dist:/usr/share/nginx/html:ro
       - static_volume:/scoopadive/staticfiles
-      - /etc/letsencrypt/live/scoopadive.com:/etc/letsencrypt/live/scoopadive.com:ro
-      - /etc/letsencrypt/archive/scoopadive.com:/etc/letsencrypt/archive/scoopadive.com:ro
 
     depends_on:
       - web
