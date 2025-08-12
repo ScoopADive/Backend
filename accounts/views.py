@@ -11,6 +11,12 @@ import requests
 
 
 def get_secret(setting, secrets_file='secrets.json'):
+    # 1️⃣ 환경변수에서 먼저 찾기
+    env_value = os.getenv(setting.upper())
+    if env_value:
+        return env_value
+
+    # 2️⃣ 없으면 secrets.json 파일에서 찾기
     base_dir = Path(__file__).resolve().parent.parent
     secret_path = os.path.join(base_dir, secrets_file)
     with open(secret_path) as f:
@@ -18,7 +24,7 @@ def get_secret(setting, secrets_file='secrets.json'):
     try:
         return secrets['web'][setting]
     except KeyError:
-        raise Exception(f"Set the {setting} environment variable in {secrets_file}")
+        raise Exception(f"Set the {setting} environment variable in {secrets_file} or as env var")
 
 GOOGLE_CLIENT_ID = get_secret("client_id")
 GOOGLE_SECRET = get_secret("client_secret")
