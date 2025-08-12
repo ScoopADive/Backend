@@ -10,6 +10,14 @@ services:
       python manage.py migrate &&
       gunicorn scoopadive.wsgi:application --bind 0.0.0.0:8000
       "
+    env_file:
+      - .env   # .env 파일로 관리 가능
+    environment:
+      GOOGLE_CLIENT_ID=${{ secrets.CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
+      GOOGLE_REDIRECT=${{ secrets.AUTH_URI }}
+      GOOGLE_CALLBACK_URI=${{ secrets.REDIRECT_URIS }}
+
     ports:
       - "8000:8000"
     env_file:
