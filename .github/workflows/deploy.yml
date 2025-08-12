@@ -45,6 +45,10 @@ jobs:
 
           echo "==> 환경 변수 파일 생성"
           cat <<EOF > .env
+
+          # Secret Key
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          
           # Google OAuth
           GOOGLE_CLIENT_ID=${{ secrets.CLIENT_ID }}
           GOOGLE_CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
