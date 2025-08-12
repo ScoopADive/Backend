@@ -31,6 +31,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = os.environ.get('SECRET_KEY') # 기본 사용방법
 
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -46,6 +47,7 @@ AUTH_USER_MODEL = 'auths.User'
 INSTALLED_APPS = [
     "logbook.apps.LogbookConfig",
     "auths.apps.AuthsConfig",
+    "accounts.apps.AccountsConfig",
     "mypage.apps.MypageConfig",
     "home.apps.HomeConfig",
     "search.apps.SearchConfig",
@@ -62,7 +64,6 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',
     'allauth',
     "django_extensions",
-    'django.contrib.sites',
 
     "django.contrib.admin",
     "django.contrib.auth",
@@ -70,6 +71,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
+    'django.contrib.sites',  # 사이트 프레임워크 필수
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',  # 구글 소셜로그인 프로바이더
+
 ]
 
 SITE_ID = 1
@@ -184,8 +191,12 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # cors
     'corsheaders.middleware.CorsMiddleware',
-
+    "allauth.account.middleware.AccountMiddleware",
 ]
+
+ACCOUNT_EMAIL_REQUIRED = True            # email 필드 사용 o
+ACCOUNT_USERNAME_REQUIRED = True         # username 필드 사용 o
+ACCOUNT_AUTHENTICATION_METHOD = "email"
 
 CORS_ALLOW_ALL_ORIGINS = True
 

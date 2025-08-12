@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
+
+from .models import User
 from .serializers import UserCreateSerializer, LogoutSerializer
 from .serializers import CustomTokenObtainPairSerializer  # 후술
 from rest_framework.views import APIView
@@ -36,3 +38,5 @@ class LogoutView(APIView):
             return Response({"detail": "Refresh token required."}, status=status.HTTP_400_BAD_REQUEST)
         except TokenError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+

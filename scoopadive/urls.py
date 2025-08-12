@@ -44,14 +44,18 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
-    authentication_classes=[],  # 여기를 꼭 비워야 기본 인증 안 뜸
 )
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+
     path('api/home/', include("home.urls")),
     path("api/logbooks/", include("logbook.urls")),
     path("api/auths/", include("auths.urls")),
+
+    path("api/accounts/", include("accounts.urls")),
+
     path('api/mypage/', include("mypage.urls")),
     path('api/search/', include("search.urls")),
 
