@@ -28,6 +28,9 @@ jobs:
         context: .
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1
+        no-cache: true
 
     - name: SSH and deploy using docker-compose
       uses: appleboy/ssh-action@v1.0.0
