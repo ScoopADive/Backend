@@ -7,15 +7,15 @@ from auths.models import User
 import os
 import requests
 
-GOOGLE_CLIENT_ID = os.environ.get("CLIENT_ID")
-GOOGLE_SECRET = os.environ.get("CLIENT_SECRET")
-GOOGLE_REDIRECT = os.environ.get("AUTH_URI")
-GOOGLE_CALLBACK_URI = os.environ.get("REDIRECT_URIS")
-
 class GoogleLoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
+        GOOGLE_CLIENT_ID = os.environ.get("CLIENT_ID")
+        GOOGLE_SECRET = os.environ.get("CLIENT_SECRET")
+        GOOGLE_REDIRECT = os.environ.get("AUTH_URI")
+        GOOGLE_CALLBACK_URI = os.environ.get("REDIRECT_URIS")
+
         auth_url = (
             f"{GOOGLE_REDIRECT}?response_type=code"
             f"&client_id={GOOGLE_CLIENT_ID}"
