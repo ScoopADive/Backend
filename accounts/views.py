@@ -11,15 +11,10 @@ class GoogleLoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
-        GOOGLE_CLIENT_ID = os.environ.get("CLIENT_ID")
-        GOOGLE_SECRET = os.environ.get("CLIENT_SECRET")
-        GOOGLE_REDIRECT = os.environ.get("AUTH_URI")
-        GOOGLE_CALLBACK_URI = os.environ.get("REDIRECT_URIS")
-
-        print("CLIENT_ID:", os.environ.get("CLIENT_ID"))
-        print("CLIENT_SECRET:", os.environ.get("CLIENT_SECRET"))
-        print("AUTH_URI:", os.environ.get("AUTH_URI"))
-        print("REDIRECT_URIS:", os.environ.get("REDIRECT_URIS"))
+        GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+        GOOGLE_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+        GOOGLE_REDIRECT = os.environ.get("GOOGLE_REDIRECT")
+        GOOGLE_CALLBACK_URI = os.environ.get("GOOGLE_CALLBACK_URI")
 
         auth_url = (
             f"{GOOGLE_REDIRECT}?response_type=code"
@@ -39,10 +34,10 @@ class GoogleCallbackView(APIView):
         if not code:
             return Response({"error": "Authorization code not provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-        GOOGLE_CLIENT_ID = os.environ.get("CLIENT_ID")
-        GOOGLE_SECRET = os.environ.get("CLIENT_SECRET")
-        GOOGLE_REDIRECT = os.environ.get("AUTH_URI")
-        GOOGLE_CALLBACK_URI = os.environ.get("REDIRECT_URIS")
+        GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+        GOOGLE_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+        GOOGLE_REDIRECT = os.environ.get("GOOGLE_REDIRECT")
+        GOOGLE_CALLBACK_URI = os.environ.get("GOOGLE_CALLBACK_URI")
 
         token_data = {
             "code": code,
