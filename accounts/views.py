@@ -4,33 +4,13 @@ from rest_framework import status, permissions
 from allauth.socialaccount.models import SocialAccount
 from rest_framework_simplejwt.tokens import RefreshToken
 from auths.models import User
-from pathlib import Path
 import os
-import json
 import requests
 
-
-def get_secret(setting, secrets_file='secrets.json'):
-    # 1️⃣ 환경변수에서 먼저 찾기
-    env_value = os.getenv(setting.upper())
-    if env_value:
-        return env_value
-
-    # 2️⃣ 없으면 secrets.json 파일에서 찾기
-    base_dir = Path(__file__).resolve().parent.parent
-    secret_path = os.path.join(base_dir, secrets_file)
-    with open(secret_path) as f:
-        secrets = json.load(f)
-    try:
-        return secrets['web'][setting]
-    except KeyError:
-        raise Exception(f"Set the {setting} environment variable in {secrets_file} or as env var")
-
-GOOGLE_CLIENT_ID = get_secret("client_id")
-GOOGLE_SECRET = get_secret("client_secret")
-GOOGLE_REDIRECT = get_secret("auth_uri")
-GOOGLE_CALLBACK_URI = get_secret("redirect_uris")[0]
-
+GOOGLE_CLIENT_ID = os.environ.get("CLIENT_ID")
+GOOGLE_SECRET = os.environ.get("CLIENT_SECRET")
+GOOGLE_REDIRECT = os.environ.get("AUTH_URI")
+GOOGLE_CALLBACK_URI = os.environ.get("REDIRECT_URIS")
 
 class GoogleLoginView(APIView):
     permission_classes = [permissions.AllowAny]
