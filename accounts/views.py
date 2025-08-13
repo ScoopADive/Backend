@@ -34,6 +34,11 @@ class GoogleCallbackView(APIView):
         if not code:
             return Response({"error": "Authorization code not provided"}, status=status.HTTP_400_BAD_REQUEST)
 
+        GOOGLE_CLIENT_ID = os.environ.get("CLIENT_ID")
+        GOOGLE_SECRET = os.environ.get("CLIENT_SECRET")
+        GOOGLE_REDIRECT = os.environ.get("AUTH_URI")
+        GOOGLE_CALLBACK_URI = os.environ.get("REDIRECT_URIS")
+
         token_data = {
             "code": code,
             "client_id": GOOGLE_CLIENT_ID,
