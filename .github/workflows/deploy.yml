@@ -45,10 +45,9 @@ jobs:
 
             echo "==> 환경변수 파일 생성 (.env)"
             cat <<EOF > .env
-            GOOGLE_CLIENT_ID=${{ secrets.CLIENT_ID }}
-            GOOGLE_CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
-            GOOGLE_REDIRECT=${{ secrets.AUTH_URI }}
-            GOOGLE_CALLBACK_URI=${{ secrets.REDIRECT_URIS }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_REDIRECT=${{ secrets.GOOGLE_REDIRECT }}
+            GOOGLE_CALLBACK_URI=${{ secrets.GOOGLE_CALLBACK_URI }}
             
             DB_NAME=${{ secrets.DB_NAME }}
             DB_USER=${{ secrets.DB_USER }}
