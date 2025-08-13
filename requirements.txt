@@ -16,4 +16,6 @@ django-rest-authtoken
 django-extensions
 Pillow
 django-cors-headers
+cryptography
+
 
