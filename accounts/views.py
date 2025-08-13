@@ -16,6 +16,11 @@ class GoogleLoginView(APIView):
         GOOGLE_REDIRECT = os.environ.get("AUTH_URI")
         GOOGLE_CALLBACK_URI = os.environ.get("REDIRECT_URIS")
 
+        print("CLIENT_ID:", os.environ.get("CLIENT_ID"))
+        print("CLIENT_SECRET:", os.environ.get("CLIENT_SECRET"))
+        print("AUTH_URI:", os.environ.get("AUTH_URI"))
+        print("REDIRECT_URIS:", os.environ.get("REDIRECT_URIS"))
+
         auth_url = (
             f"{GOOGLE_REDIRECT}?response_type=code"
             f"&client_id={GOOGLE_CLIENT_ID}"
