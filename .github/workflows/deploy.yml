@@ -48,6 +48,7 @@ jobs:
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_REDIRECT=${{ secrets.GOOGLE_REDIRECT }}
             GOOGLE_CALLBACK_URI=${{ secrets.GOOGLE_CALLBACK_URI }}
+            GOOGLE_SECRET=${{secrets.GOOGLE_SECRET }}
             
             DB_NAME=${{ secrets.DB_NAME }}
             DB_USER=${{ secrets.DB_USER }}
