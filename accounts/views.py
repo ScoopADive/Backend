@@ -18,6 +18,7 @@ GOOGLE_CALLBACK_URI = os.environ.get("GOOGLE_CALLBACK_URI")
 
 
 
+
 class GoogleLoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -27,10 +28,12 @@ class GoogleLoginView(APIView):
         GOOGLE_REDIRECT = os.environ.get("GOOGLE_REDIRECT")
         GOOGLE_CALLBACK_URI = os.environ.get("GOOGLE_CALLBACK_URI")
 
+
         auth_url = (
             f"{GOOGLE_REDIRECT}?response_type=code"
             f"&client_id={GOOGLE_CLIENT_ID}"
             f"&redirect_uri={GOOGLE_CALLBACK_URI}"
+            f"&scope=email%20profile%20openid"
             f"&access_type=offline"
             f"&prompt=consent"
         )
