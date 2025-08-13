@@ -43,16 +43,19 @@ jobs:
             echo "==> 이동: /home/ubuntu/Backend"
             cd /home/ubuntu/Backend
 
-            echo "==> 환경변수 설정"
-            export GOOGLE_CLIENT_ID="${{ secrets.CLIENT_ID }}"
-            export GOOGLE_CLIENT_SECRET="${{ secrets.CLIENT_SECRET }}"
-            export GOOGLE_REDIRECT="${{ secrets.AUTH_URI }}"
-            export GOOGLE_CALLBACK_URI="${{ secrets.REDIRECT_URIS }}"
-            export DB_NAME="${{ secrets.DB_NAME }}"
-            export DB_USER="${{ secrets.DB_USER }}"
-            export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
-            export DB_HOST="${{ secrets.DB_HOST }}"
-            export DB_PORT="${{ secrets.DB_PORT }}"
+            echo "==> 환경변수 파일 생성 (.env)"
+            cat <<EOF > .env
+            GOOGLE_CLIENT_ID=${{ secrets.CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
+            GOOGLE_REDIRECT=${{ secrets.AUTH_URI }}
+            GOOGLE_CALLBACK_URI=${{ secrets.REDIRECT_URIS }}
+            
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            EOF
 
             echo "==> 최신 이미지 Pull"
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
