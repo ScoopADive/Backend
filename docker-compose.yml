@@ -10,18 +10,8 @@ services:
       python manage.py migrate &&
       gunicorn scoopadive.wsgi:application --bind 0.0.0.0:8000
       "
-    environment:
-      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID}"
-      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET}"
-      GOOGLE_REDIRECT: "${GOOGLE_REDIRECT}"
-      GOOGLE_CALLBACK_URI: "${GOOGLE_CALLBACK_URI}"
-
-      DB_NAME: "${DB_NAME}"
-      DB_USER: "${DB_USER}"
-      DB_PASSWORD: "${DB_PASSWORD}"
-      DB_HOST: "${DB_HOST}"
-      DB_PORT: "${DB_PORT}"
-
+    env_file:
+      - .env
     ports:
       - "8000:8000"
     volumes:
