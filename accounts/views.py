@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
@@ -6,6 +9,14 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from auths.models import User
 import os
 import requests
+
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+GOOGLE_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+GOOGLE_REDIRECT = os.environ.get("GOOGLE_REDIRECT")
+GOOGLE_CALLBACK_URI = os.environ.get("GOOGLE_CALLBACK_URI")
+
+
+
 
 class GoogleLoginView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -34,10 +45,6 @@ class GoogleCallbackView(APIView):
         if not code:
             return Response({"error": "Authorization code not provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-        GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-        GOOGLE_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
-        GOOGLE_REDIRECT = os.environ.get("GOOGLE_REDIRECT")
-        GOOGLE_CALLBACK_URI = os.environ.get("GOOGLE_CALLBACK_URI")
 
         token_data = {
             "code": code,
