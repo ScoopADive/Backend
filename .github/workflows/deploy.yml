@@ -60,13 +60,14 @@ jobs:
             EOF
 
             echo "==> 최신 이미지 Pull"
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/scoopadive:latest
-
+            sudo docker-compose pull web
+            
             echo "==> 기존 컨테이너 중지 및 제거"
             sudo docker-compose down
-
+            
             echo "==> 최신 이미지 기반 컨테이너 다시 실행"
             sudo docker-compose up -d
+
 
             echo "==> 마이그레이션 실행"
             sudo docker-compose exec -T web python manage.py migrate
