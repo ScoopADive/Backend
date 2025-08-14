@@ -117,6 +117,8 @@ REST_FRAMEWORK = {
 }
 
 # SWAGGER 세팅
+SECURE_SSL_REDIRECT = True
+
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'Bearer': {
