@@ -131,13 +131,6 @@ SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,  # 세션 기반 인증 비활성화
 }
 
-# ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
-# ACCOUNT_USERNAME_REQUIRED = True
-# ACCOUNT_EMAIL_REQUIRED = True
-# ACCOUNT_UNIQUE_EMAIL = True
-# ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
-# ACCOUNT_EMAIL_VERIFICATION = 'optional'
-
 from datetime import timedelta
 
 ## JWT
