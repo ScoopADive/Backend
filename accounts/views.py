@@ -16,9 +16,6 @@ GOOGLE_REDIRECT = os.environ.get("GOOGLE_REDIRECT")
 GOOGLE_CALLBACK_URI = os.environ.get("GOOGLE_CALLBACK_URI")
 
 
-
-
-
 class GoogleLoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
