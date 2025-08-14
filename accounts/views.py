@@ -11,7 +11,7 @@ import os
 import requests
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-GOOGLE_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+GOOGLE_SECRET = os.environ.get("GOOGLE_SECRET")
 GOOGLE_REDIRECT = os.environ.get("GOOGLE_REDIRECT")
 GOOGLE_CALLBACK_URI = os.environ.get("GOOGLE_CALLBACK_URI")
 
@@ -20,12 +20,6 @@ class GoogleLoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
-        GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-        GOOGLE_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
-        GOOGLE_REDIRECT = os.environ.get("GOOGLE_REDIRECT")
-        GOOGLE_CALLBACK_URI = os.environ.get("GOOGLE_CALLBACK_URI")
-
-
         auth_url = (
             f"{GOOGLE_REDIRECT}?response_type=code"
             f"&client_id={GOOGLE_CLIENT_ID}"
