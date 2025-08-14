@@ -1,16 +1,11 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from allauth.socialaccount.models import SocialAccount
-from rest_framework_simplejwt.tokens import RefreshToken
-from auths.models import User
-import os
 import requests
-
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-GOOGLE_SECRET = os.environ.get("GOOGLE_SECRET")
-GOOGLE_REDIRECT = os.environ.get("GOOGLE_REDIRECT")
-GOOGLE_CALLBACK_URI = os.environ.get("GOOGLE_CALLBACK_URI")
+from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework import permissions
+from rest_framework_simplejwt.tokens import RefreshToken
+from allauth.socialaccount.models import SocialAccount
+from auths.models import User
+from scoopadive.settings import GOOGLE_REDIRECT, GOOGLE_CLIENT_ID, GOOGLE_CALLBACK_URI, GOOGLE_SECRET
 
 
 class GoogleLoginView(APIView):
@@ -25,7 +20,7 @@ class GoogleLoginView(APIView):
             f"&access_type=offline"
             f"&prompt=consent"
         )
-        return Response({"auth_url": auth_url})
+        return JsonResponse({"auth_url": auth_url})
 
 
 class GoogleCallbackView(APIView):
@@ -34,9 +29,9 @@ class GoogleCallbackView(APIView):
     def get(self, request):
         code = request.GET.get("code")
         if not code:
-            return Response({"error": "Authorization code not provided"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"error": "Authorization code not provided"}, status=400)
 
-
+        # 1️⃣ 토큰 요청
         token_data = {
             "code": code,
             "client_id": GOOGLE_CLIENT_ID,
@@ -44,50 +39,50 @@ class GoogleCallbackView(APIView):
             "redirect_uri": GOOGLE_CALLBACK_URI,
             "grant_type": "authorization_code",
         }
-
         token_req = requests.post("https://oauth2.googleapis.com/token", data=token_data)
         if token_req.status_code != 200:
-            return Response({"error": "Failed to get access token"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"error": "Failed to get access token", "detail": token_req.text}, status=400)
 
-        token_req_json = token_req.json()
-        access_token = token_req_json.get("access_token")
+        access_token = token_req.json().get("access_token")
         if not access_token:
-            return Response({"error": "Access token not found in response"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"error": "Access token not found"}, status=400)
 
+        # 2️⃣ 구글 유저 정보 가져오기
         user_info_req = requests.get(
             "https://www.googleapis.com/oauth2/v1/userinfo",
             params={"access_token": access_token},
         )
         if user_info_req.status_code != 200:
-            return Response({"error": "Failed to get user info"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"error": "Failed to get user info"}, status=400)
 
         user_info = user_info_req.json()
         email = user_info.get("email")
+        username = user_info.get("name") or email.split("@")[0]
+        uid = user_info.get("id")  # Google UID
         if not email:
-            return Response({"error": "Email not found in user info"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"error": "Email not found in user info"}, status=400)
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({"error": "User account does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        # 3️⃣ User 생성
+        user, created_user = User.objects.get_or_create(
+            email=email,
+            defaults={"username": username, "is_active": True}
+        )
 
-        try:
-            social_user = SocialAccount.objects.get(user=user)
-            if social_user.provider != "google":
-                return Response({"error": "User account not exist for Google login"}, status=status.HTTP_400_BAD_REQUEST)
-        except SocialAccount.DoesNotExist:
-            return Response({"error": "Social account not linked"}, status=status.HTTP_400_BAD_REQUEST)
+        # 4️⃣ SocialAccount 연결
+        social_account, created_social = SocialAccount.objects.get_or_create(
+            provider="google",
+            uid=uid,
+            defaults={"user": user, "extra_data": user_info}
+        )
 
+        # 5️⃣ JWT 발급
         refresh = RefreshToken.for_user(user)
-
-        return Response({
-            "user": {
-                "id": user.id,
-                "email": user.email,
-            },
+        response_data = {
+            "user": {"id": user.id, "email": user.email, "username": user.username},
             "message": "login success",
             "token": {
                 "access_token": str(refresh.access_token),
                 "refresh_token": str(refresh),
             }
-        }, status=status.HTTP_200_OK)
+        }
+        return JsonResponse(response_data, status=200)

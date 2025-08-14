@@ -30,8 +30,6 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY') # 기본 사용방법
 
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -187,9 +185,37 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
 ]
 
-ACCOUNT_EMAIL_REQUIRED = True            # email 필드 사용 o
-ACCOUNT_USERNAME_REQUIRED = True         # username 필드 사용 o
-ACCOUNT_AUTHENTICATION_METHOD = "email"
+
+AUTHENTICATION_BACKENDS = (
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+# 구글 로그인 설정
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+GOOGLE_SECRET = os.environ.get("GOOGLE_SECRET")
+GOOGLE_REDIRECT = os.environ.get("GOOGLE_REDIRECT")
+GOOGLE_CALLBACK_URI = os.environ.get("GOOGLE_CALLBACK_URI")
+
+# 이메일/비밀번호 회원가입 비활성화
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
+
+AUTH_USER_MODEL = 'auths.User'
+
+# 자동 구글 회원가입 허용
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+    }
+}
+
+# 로그인 후 리다이렉트
+LOGIN_REDIRECT_URL = '/'
+
 
 CORS_ALLOW_ALL_ORIGINS = True
 
