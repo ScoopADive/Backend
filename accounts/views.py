@@ -1,5 +1,6 @@
 import requests
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -20,7 +21,9 @@ class GoogleLoginView(APIView):
             f"&access_type=offline"
             f"&prompt=consent"
         )
-        return JsonResponse({"auth_url": auth_url})
+        # JSON 대신 바로 구글 로그인 페이지로 redirect
+        return redirect(auth_url)
+
 
 
 class GoogleCallbackView(APIView):
@@ -77,12 +80,8 @@ class GoogleCallbackView(APIView):
 
         # 5️⃣ JWT 발급
         refresh = RefreshToken.for_user(user)
-        response_data = {
-            "user": {"id": user.id, "email": user.email, "username": user.username},
-            "message": "login success",
-            "token": {
-                "access_token": str(refresh.access_token),
-                "refresh_token": str(refresh),
-            }
-        }
-        return JsonResponse(response_data, status=200)
+        access_token_str = str(refresh.access_token)
+
+        # 6️⃣ 프론트로 redirect (JSON 대신)
+        frontend_redirect_url = f"https://scoopadive.com/api/accounts/google/callback?token={access_token_str}"
+        return redirect(frontend_redirect_url)
