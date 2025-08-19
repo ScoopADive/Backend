@@ -83,6 +83,12 @@ class GoogleCallbackView(APIView):
         refresh = RefreshToken.for_user(user)
         access_token_str = str(refresh.access_token)
 
-        # 6️⃣ 프론트로 redirect (JWT 포함)
-        frontend_redirect_url = f"{FRONTEND_URL}/?token={access_token_str}"
+        # 6️⃣ 프론트로 redirect (JWT + 사용자 정보 포함)
+        frontend_redirect_url = (
+            f"{FRONTEND_URL}/oauth2/redirect?"
+            f"token={access_token_str}"
+            f"&email={email}"
+            f"&name={username}"
+            f"&id={user.id}"
+        )
         return redirect(frontend_redirect_url)
