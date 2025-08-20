@@ -98,8 +98,8 @@ class EditProfileView(APIView):
         request_body=UserUpdateSerializer,
         consumes=['multipart/form-data']
     )
-    def put(self, request, pk):
-        user = get_object_or_404(User, pk=pk)
+    def put(self, request, id):
+        user = get_object_or_404(User, pk=id)
 
         if request.user != user:
             return Response({'detail': '수정 권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
