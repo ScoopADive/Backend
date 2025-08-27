@@ -38,6 +38,13 @@ class BucketListViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]  # 이미지 업로드를 위해 필요
 
+    def get_queryset(self):
+        return BucketList.objects.filter(user=self.request.user).order_by('created_at')
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    def perform_update(self, serializer):
+        serializer.save(user=self.request.user)
+
 class FriendsListAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
