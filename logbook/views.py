@@ -23,7 +23,7 @@ class LogbookViewSet(viewsets.ModelViewSet):
         return LogbookSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'get_likes', 'get_like']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
