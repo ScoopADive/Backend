@@ -218,7 +218,6 @@ SOCIALACCOUNT_PROVIDERS = {
 # 로그인 후 리다이렉트
 LOGIN_REDIRECT_URL = '/'
 
-
 CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = "scoopadive.urls"

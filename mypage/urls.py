@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 
 from .views import MyPageView, BucketListViewSet, FriendsListAPIView, FriendsDetailView, ListUsersView, \
-    EditProfileView, MySkillsViewSet
+    EditProfileView, MySkillsViewSet, GetMyProfileView
 
 router = DefaultRouter()
 router.register(r'bucketlists', BucketListViewSet, basename='bucketlists')
@@ -11,6 +11,9 @@ router.register(r'bucketlists', BucketListViewSet, basename='bucketlists')
 router.register('myskills', MySkillsViewSet, basename='myskills')
 urlpatterns = [
     path('', include(router.urls)),
+
+    path('profile/', GetMyProfileView.as_view(), name='mypage_profile'),
+
     path('', MyPageView.as_view(), name='mypage'),
     path('all/', ListUsersView.as_view(), name='mypage-all'),
 
