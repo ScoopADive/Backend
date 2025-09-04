@@ -59,9 +59,18 @@ class LogbookViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def like(self, request, pk=None):
-        logbook = self.get_object()
-        logbook.likes.add(request.user)
-        return Response({'status': f'Liked logbook {pk}'}, status=status.HTTP_201_CREATED)
+        log = self.get_object()
+        user = request.user
+        if log.liked_by.filter(id=user.id).exists():
+            log.liked_by.remove(user)
+            liked = False
+        else:
+            log.liked_by.add(user)
+            liked = True
+        return Response({
+            'liked': liked,
+            'likes_count': log.liked_by.count()
+        }, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['delete'])
     def unlike(self, request, pk=None):
