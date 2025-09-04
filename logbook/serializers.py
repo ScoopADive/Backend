@@ -12,17 +12,21 @@ class LogbookSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
 
     def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            validated_data['user'] = request.user
         return super().create(validated_data)
 
     def get_liked_by_current_user(self, obj):
-        user = self.context['request'].user
-        if user.is_authenticated:
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated:
             return obj.liked_by.filter(id=user.id).exists()
         return False
 
     def get_likes_count(self, obj):
         return obj.liked_by.count()
+
 
 
 class LogbookLikeSerializer(serializers.ModelSerializer):
