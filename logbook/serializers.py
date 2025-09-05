@@ -11,14 +11,12 @@ class LogbookSerializer(serializers.ModelSerializer):
     buddy_input = serializers.CharField(write_only=True, required=False, allow_blank=True)
     buddy = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False, allow_null=True)
 
-    # write 전용
     equipment_names = serializers.ListField(
         child=serializers.CharField(),
         write_only=True,
         required=False
     )
 
-    # read 전용
     equipment = serializers.SlugRelatedField(
         slug_field="name",
         many=True,
@@ -31,8 +29,9 @@ class LogbookSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
 
     def create(self, validated_data):
+        # write용 필드 먼저 pop
         buddy_input = validated_data.pop('buddy_input', None)
-        equipment_list = validated_data.pop('equipment', [])  # 프론트에서 배열로 보내야 함
+        equipment_list = validated_data.pop('equipment_names', [])
 
         # Buddy 처리
         if buddy_input and buddy_input.startswith('@'):
@@ -72,6 +71,7 @@ class LogbookSerializer(serializers.ModelSerializer):
 
     def get_likes_count(self, obj):
         return obj.likes.count()
+
 
 
 class LogbookLikeSerializer(serializers.ModelSerializer):
