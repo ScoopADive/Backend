@@ -51,32 +51,28 @@ class LogbookViewSet(viewsets.ModelViewSet):
         ]
         return Response(data)
 
-    @action(detail=True, methods=['get'])
-    def get_like(self, request, pk=None):
-        logbook = get_object_or_404(Logbook, pk=pk)
-        likes = list(logbook.likes.values_list('username', flat=True))
-        return Response(likes)
-
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['get', 'post', 'delete'])
     def like(self, request, pk=None):
         log = self.get_object()
         user = request.user
-        if log.liked_by.filter(id=user.id).exists():
-            log.liked_by.remove(user)
-            liked = False
-        else:
-            log.liked_by.add(user)
-            liked = True
-        return Response({
-            'liked': liked,
-            'likes_count': log.liked_by.count()
-        }, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['delete'])
-    def unlike(self, request, pk=None):
-        logbook = self.get_object()
-        logbook.likes.remove(request.user)
-        return Response({'status': f'Unliked logbook {pk}'}, status=status.HTTP_204_NO_CONTENT)
+        if request.method == 'GET':
+            likes = list(log.liked_by.values_list('username', flat=True))
+            return Response(likes)
+
+        elif request.method == 'POST':
+            log.liked_by.add(user)
+            return Response({
+                'liked': True,
+                'likes_count': log.liked_by.count()
+            }, status=status.HTTP_200_OK)
+
+        elif request.method == 'DELETE':
+            log.liked_by.remove(user)
+            return Response({
+                'liked': False,
+                'likes_count': log.liked_by.count()
+            }, status=status.HTTP_200_OK)
 
 
 class FriendLogbookAPIView(APIView):
