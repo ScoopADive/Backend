@@ -21,11 +21,13 @@ class LogbookSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         user = getattr(request, 'user', None)
         if user and user.is_authenticated:
-            return obj.liked_by.filter(id=user.id).exists()
+            # liked_by -> likes 로 변경
+            return obj.likes.filter(id=user.id).exists()
         return False
 
     def get_likes_count(self, obj):
-        return obj.liked_by.count()
+        # liked_by -> likes 로 변경
+        return obj.likes.count()
 
 
 
