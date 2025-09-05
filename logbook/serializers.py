@@ -4,6 +4,7 @@ from logbook.models import Logbook, Comment, Equipment, DiveCenter
 
 User = get_user_model()
 
+
 class LogbookSerializer(serializers.ModelSerializer):
     liked_by_current_user = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
@@ -11,7 +12,12 @@ class LogbookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Logbook
         fields = '__all__'
-        read_only_fields = ['user']
+        read_only_fields = ['user', 'likes']  # likes는 읽기 전용
+
+    def create(self, validated_data):
+        # likes 제거
+        validated_data.pop('likes', None)
+        return Logbook.objects.create(**validated_data)
 
     def get_liked_by_current_user(self, obj):
         request = self.context.get('request')
