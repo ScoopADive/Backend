@@ -6,13 +6,14 @@ User = get_user_model()
 
 
 class LogbookSerializer(serializers.ModelSerializer):
-    liked_by_current_user = serializers.SerializerMethodField()
-    likes_count = serializers.SerializerMethodField()
-
     class Meta:
         model = Logbook
         fields = '__all__'
-        read_only_fields = ['user', 'likes']  # likes는 읽기 전용
+        read_only_fields = ['user']
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
 
     def get_liked_by_current_user(self, obj):
         request = self.context.get('request')
