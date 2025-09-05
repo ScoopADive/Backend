@@ -24,7 +24,7 @@ class Logbook(models.Model):
     dive_image = models.ImageField(upload_to='logbooks_images', null=True, blank=True)
     feeling = models.TextField(null=True, blank=True)
     buddy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='buddy_logbooks', null=True, blank=True)
-    buddy_str = models.TextField(null=True, blank=True)
+    # buddy_str = models.TextField(null=True, blank=True)
     dive_title = models.CharField(max_length=256)
     dive_site = models.CharField(max_length=256)
     dive_date = models.DateField()
