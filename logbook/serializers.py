@@ -14,13 +14,21 @@ class LogbookSerializer(serializers.ModelSerializer):
         read_only_fields = ['user', 'likes']  # M2M 필드 likes는 읽기 전용
 
     def create(self, validated_data):
-        # M2M 필드 제거
-        validated_data.pop('likes', None)
+        # M2M 필드 분리
+        equipment_data = validated_data.pop('equipment', [])
+        validated_data.pop('likes', None)  # likes는 read-only
 
         # 작성자 자동 할당
         validated_data['user'] = self.context['request'].user
 
-        return Logbook.objects.create(**validated_data)
+        # Logbook 객체 생성
+        logbook = Logbook.objects.create(**validated_data)
+
+        # M2M 연결
+        if equipment_data:
+            logbook.equipment.set(equipment_data)
+
+        return logbook
 
     def get_liked_by_current_user(self, obj):
         request = self.context.get('request')
