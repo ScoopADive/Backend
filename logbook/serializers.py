@@ -51,19 +51,18 @@ class LogbookSerializer(serializers.ModelSerializer):
         lat = validated_data.pop('latitude', None)
         lon = validated_data.pop('longitude', None)
         if lat is not None and lon is not None:
-            validated_data['dive_coords'] = [lat, lon]
+            validated_data['dive_coords'] = [float(lat), float(lon)]
 
         # Logbook 생성
         logbook = Logbook.objects.create(**validated_data)
 
-        # Equipment 처리
+        # Equipment 처리: 문자열 → Equipment 객체
         for name in equipment_names:
             eq, _ = Equipment.objects.get_or_create(name=name)
             logbook.equipment.add(eq)
 
         return logbook
 
-    # 🔑 반드시 있어야 함
     def get_liked_by_current_user(self, obj):
         request = self.context.get('request')
         user = getattr(request, 'user', None)
