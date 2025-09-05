@@ -32,9 +32,7 @@ class LogbookSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
 
     def create(self, validated_data):
-        # write-only 필드 pop
         buddy_input = validated_data.pop('buddy_input', '')
-
         # 멘션 처리
         buddy_user = None
         buddy_str = ''
@@ -47,8 +45,8 @@ class LogbookSerializer(serializers.ModelSerializer):
         else:
             buddy_str = buddy_input
 
-        validated_data['buddy'] = buddy_user  # FK용
-        validated_data['buddy_str'] = buddy_str  # 문자열용
+        validated_data['buddy'] = buddy_user
+        validated_data['buddy_str'] = buddy_str
 
         # Dive coords 처리
         lat = validated_data.pop('latitude', None)
@@ -56,11 +54,13 @@ class LogbookSerializer(serializers.ModelSerializer):
         if lat is not None and lon is not None:
             validated_data['dive_coords'] = [float(lat), float(lon)]
 
-        # Logbook 생성 (equipment 제외)
+        # ManyToMany 필드는 create 전에 제거
+        equipment_list = validated_data.pop('equipment_names', [])
+
+        # Logbook 생성
         logbook = Logbook.objects.create(**validated_data)
 
-        # Equipment 처리 (옵션)
-        equipment_list = validated_data.pop('equipment_names', [])
+        # Equipment ManyToMany 처리
         for eq_name in equipment_list:
             eq_obj, _ = Equipment.objects.get_or_create(name=eq_name)
             logbook.equipment.add(eq_obj)
