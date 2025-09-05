@@ -32,7 +32,7 @@ class LogbookSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         buddy_input = validated_data.pop('buddy_input', None)
-        equipment_names = validated_data.pop('equipment_names', [])
+        equipment_names = validated_data.pop('equipment', [])
 
         # Buddy 처리
         if buddy_input and buddy_input.startswith('@'):
@@ -46,6 +46,12 @@ class LogbookSerializer(serializers.ModelSerializer):
         else:
             validated_data['buddy'] = None
             validated_data['buddy_str'] = buddy_input or ''
+
+        # Dive coords 처리
+        lat = validated_data.pop('latitude', None)
+        lon = validated_data.pop('longitude', None)
+        if lat is not None and lon is not None:
+            validated_data['dive_coords'] = [lat, lon]
 
         # Logbook 생성
         logbook = Logbook.objects.create(**validated_data)
