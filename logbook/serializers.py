@@ -13,7 +13,9 @@ class LogbookSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
-        return super().create(validated_data)
+        validated_data.pop('likes', None)  # M2M 제거
+        logbook = super().create(validated_data)
+        return logbook
 
     def get_liked_by_current_user(self, obj):
         request = self.context.get('request')
