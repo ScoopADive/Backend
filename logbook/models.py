@@ -32,7 +32,7 @@ class Logbook(models.Model):
     bottom_time = models.DurationField(help_text="예: 00:35:00 (35분)")
     weather = models.CharField(max_length=100, choices=WEATHER_CHOICES, null=True, blank=True)
     type_of_dive = models.CharField(max_length=256, choices=DIVE_TYPE_CHOICES, null=True, blank=True)
-    equipment = models.ManyToManyField(Equipment, related_name="equipment", blank=True)
+    # equipment = models.ManyToManyField(Equipment, related_name="equipment", blank=True)
     weight = models.PositiveSmallIntegerField(help_text="사용한 납 무게 (kg)")
     start_pressure = models.PositiveSmallIntegerField()
     end_pressure = models.PositiveSmallIntegerField()
