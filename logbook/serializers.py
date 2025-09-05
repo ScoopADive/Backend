@@ -4,18 +4,23 @@ from logbook.models import Logbook, Comment
 
 User = get_user_model()
 
-
 class LogbookSerializer(serializers.ModelSerializer):
+    liked_by_current_user = serializers.SerializerMethodField()
+    likes_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Logbook
         fields = '__all__'
-        read_only_fields = ['user']
+        read_only_fields = ['user', 'likes']  # M2M 필드 likes는 읽기 전용
 
     def create(self, validated_data):
+        # M2M 필드 제거
+        validated_data.pop('likes', None)
+
+        # 작성자 자동 할당
         validated_data['user'] = self.context['request'].user
-        validated_data.pop('likes', None)  # M2M 제거
-        logbook = super().create(validated_data)
-        return logbook
+
+        return Logbook.objects.create(**validated_data)
 
     def get_liked_by_current_user(self, obj):
         request = self.context.get('request')
