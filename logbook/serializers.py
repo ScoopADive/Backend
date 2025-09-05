@@ -32,7 +32,7 @@ class LogbookSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         buddy_input = validated_data.pop('buddy_input', None)
-        equipment_names = validated_data.pop('equipment', [])
+        equipment_list = validated_data.pop('equipment', [])  # 프론트에서 배열로 보내야 함
 
         # Buddy 처리
         if buddy_input and buddy_input.startswith('@'):
@@ -47,19 +47,19 @@ class LogbookSerializer(serializers.ModelSerializer):
             validated_data['buddy'] = None
             validated_data['buddy_str'] = buddy_input or ''
 
-        # Dive coords 처리
+        # Dive coords 처리 (latitude, longitude)
         lat = validated_data.pop('latitude', None)
         lon = validated_data.pop('longitude', None)
         if lat is not None and lon is not None:
             validated_data['dive_coords'] = [float(lat), float(lon)]
 
-        # Logbook 생성
+        # Logbook 생성 (ManyToMany 제외)
         logbook = Logbook.objects.create(**validated_data)
 
-        # Equipment 처리: 문자열 → Equipment 객체
-        for name in equipment_names:
-            eq, _ = Equipment.objects.get_or_create(name=name)
-            logbook.equipment.add(eq)
+        # Equipment 처리: 문자열 → Equipment 객체 생성 후 ManyToMany 연결
+        for eq_name in equipment_list:
+            eq_obj, _ = Equipment.objects.get_or_create(name=eq_name)
+            logbook.equipment.add(eq_obj)
 
         return logbook
 
