@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from logbook.models import Logbook, Comment, Equipment, DiveCenter
+from logbook.models import Logbook, Comment
 
 User = get_user_model()
 
@@ -11,27 +11,13 @@ class LogbookSerializer(serializers.ModelSerializer):
     buddy_input = serializers.CharField(write_only=True, required=False, allow_blank=True)
     buddy = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False, allow_null=True)
 
-    equipment_names = serializers.ListField(
-        child=serializers.CharField(),
-        write_only=True,
-        required=False
-    )
-
-    equipment = serializers.SlugRelatedField(
-        slug_field="name",
-        many=True,
-        read_only=True
-    )
-
     class Meta:
         model = Logbook
         fields = '__all__'
         read_only_fields = ['user']
 
     def create(self, validated_data):
-        # write용 필드 먼저 pop
         buddy_input = validated_data.pop('buddy_input', None)
-        equipment_list = validated_data.pop('equipment_names', [])
 
         # Buddy 처리
         if buddy_input and buddy_input.startswith('@'):
@@ -46,20 +32,14 @@ class LogbookSerializer(serializers.ModelSerializer):
             validated_data['buddy'] = None
             validated_data['buddy_str'] = buddy_input or ''
 
-        # Dive coords 처리 (latitude, longitude)
+        # Dive coords 처리
         lat = validated_data.pop('latitude', None)
         lon = validated_data.pop('longitude', None)
         if lat is not None and lon is not None:
             validated_data['dive_coords'] = [float(lat), float(lon)]
 
-        # Logbook 생성 (ManyToMany 제외)
+        # Logbook 생성
         logbook = Logbook.objects.create(**validated_data)
-
-        # Equipment 처리: 문자열 → Equipment 객체 생성 후 ManyToMany 연결
-        for eq_name in equipment_list:
-            eq_obj, _ = Equipment.objects.get_or_create(name=eq_name)
-            logbook.equipment.add(eq_obj)
-
         return logbook
 
     def get_liked_by_current_user(self, obj):
@@ -71,7 +51,6 @@ class LogbookSerializer(serializers.ModelSerializer):
 
     def get_likes_count(self, obj):
         return obj.likes.count()
-
 
 
 class LogbookLikeSerializer(serializers.ModelSerializer):
