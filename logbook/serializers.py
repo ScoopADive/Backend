@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from logbook.models import Logbook, Comment, Equipment, DiveCenter
+from logbook.models import Logbook, Comment
 
 User = get_user_model()
 
@@ -13,11 +13,6 @@ class LogbookSerializer(serializers.ModelSerializer):
         model = Logbook
         fields = '__all__'
         read_only_fields = ['user', 'likes']  # likes는 읽기 전용
-
-    def create(self, validated_data):
-        # likes 제거
-        validated_data.pop('likes', None)
-        return Logbook.objects.create(**validated_data)
 
     def get_liked_by_current_user(self, obj):
         request = self.context.get('request')
