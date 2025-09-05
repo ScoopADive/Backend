@@ -57,21 +57,24 @@ class LogbookViewSet(viewsets.ModelViewSet):
         user = request.user
 
         if request.method == 'GET':
-            likes = list(log.liked_by.values_list('username', flat=True))
-            return Response(likes)
+            likes = list(log.likes.values_list('username', flat=True))
+            return Response({
+                'likes': likes,
+                'likes_count': log.likes.count()
+            })
 
         elif request.method == 'POST':
-            log.liked_by.add(user)
+            log.likes.add(user)
             return Response({
                 'liked': True,
-                'likes_count': log.liked_by.count()
+                'likes_count': log.likes.count()
             }, status=status.HTTP_200_OK)
 
         elif request.method == 'DELETE':
-            log.liked_by.remove(user)
+            log.likes.remove(user)
             return Response({
                 'liked': False,
-                'likes_count': log.liked_by.count()
+                'likes_count': log.likes.count()
             }, status=status.HTTP_200_OK)
 
 
