@@ -32,32 +32,35 @@ class LogbookSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
 
     def create(self, validated_data):
-        buddy_input = validated_data.pop('buddy_input', None)
-        equipment_list = validated_data.pop('equipment_names', [])
+        # write-only 필드 pop
+        buddy_input = validated_data.pop('buddy_input', '')
 
-        # Buddy 처리
-        if buddy_input and buddy_input.startswith('@'):
+        # 멘션 처리
+        buddy_user = None
+        buddy_str = ''
+        if buddy_input.startswith('@'):
             username = buddy_input[1:].strip()
             try:
-                user = User.objects.get(username__iexact=username)
-                validated_data['buddy'] = user
-                validated_data['buddy_str'] = ''
+                buddy_user = User.objects.get(username__iexact=username)
             except User.DoesNotExist:
                 raise serializers.ValidationError({'buddy_input': 'User not found'})
         else:
-            validated_data['buddy'] = None
-            validated_data['buddy_str'] = buddy_input or ''
+            buddy_str = buddy_input
 
-        # Dive coords 처리 (latitude/longitude)
+        validated_data['buddy'] = buddy_user  # FK용
+        validated_data['buddy_str'] = buddy_str  # 문자열용
+
+        # Dive coords 처리
         lat = validated_data.pop('latitude', None)
         lon = validated_data.pop('longitude', None)
         if lat is not None and lon is not None:
             validated_data['dive_coords'] = [float(lat), float(lon)]
 
-        # Logbook 생성
+        # Logbook 생성 (equipment 제외)
         logbook = Logbook.objects.create(**validated_data)
 
-        # Equipment 처리: 이름으로 가져오거나 새로 생성 후 M2M 연결
+        # Equipment 처리 (옵션)
+        equipment_list = validated_data.pop('equipment_names', [])
         for eq_name in equipment_list:
             eq_obj, _ = Equipment.objects.get_or_create(name=eq_name)
             logbook.equipment.add(eq_obj)
