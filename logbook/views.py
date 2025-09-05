@@ -41,7 +41,7 @@ class LogbookViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'])
-    def get_likes(self, request):
+    def likes(self, request):
         data = [
             {
                 'id': logbook.id,
