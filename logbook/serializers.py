@@ -18,6 +18,8 @@ class LogbookSerializer(serializers.ModelSerializer):
         equipment_data = validated_data.pop('equipment', [])
         validated_data.pop('likes', None)  # likes는 read-only
 
+        print("Validated Data:", validated_data)
+
         # 작성자 자동 할당
         validated_data['user'] = self.context['request'].user
 
