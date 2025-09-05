@@ -14,7 +14,7 @@ class LogbookAdmin(admin.ModelAdmin):
     search_fields = (
         'dive_title', 'dive_site', 'buddy', 'feeling',
     )
-    # filter_horizontal = ('equipment',)  # ManyToManyField 용
+    filter_horizontal = ('equipment',)  # ManyToManyField 용
     readonly_fields = ('bottom_time',)  # 선택적으로 읽기 전용 처리
 
     fieldsets = (
