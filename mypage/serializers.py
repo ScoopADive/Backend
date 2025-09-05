@@ -30,7 +30,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'profile_image', 'email', 'username', 'country', 'introduction',
-            'date_joined', 'bucketlists', 'own_logbooks', 'friends'
+            'date_joined', 'bucketlists', 'own_logbooks', 'friends', 'license'
         ]
         read_only_fields = ['date_joined', 'bucketlists', 'own_logbooks']
 
