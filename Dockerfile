@@ -5,10 +5,10 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /scoopadive
 
-RUN apt-get update && \
-    apt-get install -y gcc libpq-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# 필수 빌드 도구 설치 (한 번만 실행)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gcc libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /scoopadive/
 RUN pip install --upgrade pip && pip install -r requirements.txt
