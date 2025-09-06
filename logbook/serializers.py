@@ -1,8 +1,6 @@
-from django.contrib.auth import get_user_model
-from rest_framework import serializers
 from logbook.models import Logbook, Comment
+from rest_framework import serializers
 
-User = get_user_model()
 
 class LogbookSerializer(serializers.ModelSerializer):
     liked_by_current_user = serializers.SerializerMethodField()
@@ -11,26 +9,13 @@ class LogbookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Logbook
         fields = '__all__'
-        read_only_fields = ['user', 'likes']  # M2M 필드 likes는 읽기 전용
+        read_only_fields = ['user']
 
     def create(self, validated_data):
-        # M2M 필드 분리
-        equipment_data = validated_data.pop('equipment', [])
-        validated_data.pop('likes', None)  # likes는 read-only
-
-        print("Validated Data:", validated_data)
-
-        # 작성자 자동 할당
-        validated_data['user'] = self.context['request'].user
-
-        # Logbook 객체 생성
-        logbook = Logbook.objects.create(**validated_data)
-
-        # M2M 연결
-        if equipment_data:
-            logbook.equipment.set(equipment_data)
-
-        return logbook
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            validated_data['user'] = request.user
+        return super().create(validated_data)
 
     def get_liked_by_current_user(self, obj):
         request = self.context.get('request')
@@ -43,11 +28,11 @@ class LogbookSerializer(serializers.ModelSerializer):
         return obj.likes.count()
 
 
+
 class LogbookLikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Logbook
         fields = ('likes',)
-
 
 class CommentSerializer(serializers.ModelSerializer):
     author_username = serializers.CharField(source='author.username', read_only=True)
