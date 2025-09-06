@@ -9,7 +9,7 @@ class LogbookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Logbook
         fields = '__all__'
-        read_only_fields = ['user']
+        read_only_fields = ('user', 'likes')
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -33,6 +33,8 @@ class LogbookLikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Logbook
         fields = ('likes',)
+        read_only_fields = ('likes',)  # 직접 수정 금지
+
 
 class CommentSerializer(serializers.ModelSerializer):
     author_username = serializers.CharField(source='author.username', read_only=True)
