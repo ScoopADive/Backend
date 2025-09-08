@@ -14,9 +14,6 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . /scoopadive/
 
-# collectstatic 실행
-RUN python manage.py collectstatic --noinput
-
 EXPOSE 8000
 
 CMD ["gunicorn", "scoopadive.wsgi:application", "--bind", "0.0.0.0:8000"]
