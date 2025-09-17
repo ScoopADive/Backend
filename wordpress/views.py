@@ -2,16 +2,15 @@
 import requests
 from django.shortcuts import redirect
 from django.conf import settings
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from logbook.models import Logbook
 from utils.wordpress import upload_image, post_to_wordpress
-from .models import WordPressToken
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from .models import WordPressToken
-from .serializers import WordPressTokenSerializer
-
+from .serializers import WordPressTokenSerializer, LogbookPostSerializer
 
 WP_CLIENT_ID = settings.WP_CLIENT_ID
 WP_CLIENT_SECRET = settings.WP_CLIENT_SECRET
@@ -44,7 +43,7 @@ def wp_callback(request):
         user=request.user,
         defaults={"access_token": access_token, "refresh_token": refresh_token}
     )
-    return redirect("/create-dive-log/")  # 로그 작성 페이지로 이동
+    return redirect("/api/logbooks/")  # 로그 작성 페이지로 이동
 
 class WordPressTokenViewSet(viewsets.ModelViewSet):
     queryset = WordPressToken.objects.all()
@@ -59,33 +58,40 @@ class WordPressTokenViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-@login_required
-def post_logbook_to_wp(request, logbook_id):
-    logbook = get_object_or_404(Logbook, id=logbook_id, user=request.user)
-    token_obj = get_object_or_404(WordPressToken, user=request.user)
+class LogbookPostViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
 
-    media_id = None
-    if logbook.dive_image:
-        media_id = upload_image(token_obj.access_token, logbook.dive_image.path, logbook.dive_image.name)
+    @action(detail=False, methods=['post'])
+    def post_to_wp(self, request):
+        serializer = LogbookPostSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        logbook_id = serializer.validated_data['logbook_id']
 
-    title = logbook.dive_title
-    content = f"""
-    <h3>{logbook.dive_title}</h3>
-    <ul>
-      <li><b>날짜:</b> {logbook.dive_date}</li>
-      <li><b>장소:</b> {logbook.dive_site}</li>
-      <li><b>최대 수심:</b> {logbook.max_depth} m</li>
-      <li><b>바텀타임:</b> {logbook.bottom_time}</li>
-      <li><b>버디:</b> {logbook.buddy}</li>
-      <li><b>날씨:</b> {logbook.weather}</li>
-      <li><b>다이브 타입:</b> {logbook.type_of_dive}</li>
-      <li><b>장비:</b> {', '.join(eq.name for eq in logbook.equipment.all())}</li>
-      <li><b>납 무게:</b> {logbook.weight} kg</li>
-      <li><b>탱크 압력:</b> {logbook.start_pressure} → {logbook.end_pressure}</li>
-      <li><b>다이브 센터:</b> {logbook.dive_center}</li>
-    </ul>
-    <p>{logbook.feeling}</p>
-    """
+        logbook = Logbook.objects.get(id=logbook_id, user=request.user)
+        token_obj = WordPressToken.objects.get(user=request.user)
 
-    post_url = post_to_wordpress(token_obj.access_token, title, content, media_id)
-    return redirect(post_url)
+        media_id = None
+        if logbook.dive_image:
+            media_id = upload_image(token_obj.access_token, logbook.dive_image.path, logbook.dive_image.name)
+
+        title = logbook.dive_title
+        content = f"""
+        <h3>{logbook.dive_title}</h3>
+        <ul>
+          <li><b>날짜:</b> {logbook.dive_date}</li>
+          <li><b>장소:</b> {logbook.dive_site}</li>
+          <li><b>최대 수심:</b> {logbook.max_depth} m</li>
+          <li><b>바텀타임:</b> {logbook.bottom_time}</li>
+          <li><b>버디:</b> {logbook.buddy}</li>
+          <li><b>날씨:</b> {logbook.weather}</li>
+          <li><b>다이브 타입:</b> {logbook.type_of_dive}</li>
+          <li><b>장비:</b> {', '.join(eq.name for eq in logbook.equipment.all())}</li>
+          <li><b>납 무게:</b> {logbook.weight} kg</li>
+          <li><b>탱크 압력:</b> {logbook.start_pressure} → {logbook.end_pressure}</li>
+          <li><b>다이브 센터:</b> {logbook.dive_center}</li>
+        </ul>
+        <p>{logbook.feeling}</p>
+        """
+
+        post_url = post_to_wordpress(token_obj.access_token, title, content, media_id)
+        return Response({"wordpress_url": post_url}, status=status.HTTP_201_CREATED)

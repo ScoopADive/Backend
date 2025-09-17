@@ -1,16 +1,15 @@
 # myapp/urls.py
 from django.urls import path, include
-from .views import wp_login, wp_callback, post_logbook_to_wp
+from .views import wp_login, wp_callback
 from rest_framework.routers import DefaultRouter
-from .views import WordPressTokenViewSet
-
+from .views import WordPressTokenViewSet, LogbookPostViewSet
 
 router = DefaultRouter()
 router.register(r"wordpress-tokens", WordPressTokenViewSet, basename="wordpress-token")
+router.register(r"logbook-post", LogbookPostViewSet, basename="logbook-post")
 
 urlpatterns = [
-    path("", include(router.urls)),
     path("oauth/login/", wp_login, name="wp_login"),
     path("oauth/callback/", wp_callback, name="wp_callback"),
-    path("logbook/<int:logbook_id>/post/", post_logbook_to_wp, name="post_logbook_to_wp"),
+    path("", include(router.urls)),
 ]
