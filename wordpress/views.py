@@ -1,5 +1,4 @@
-import requests
-import json
+from django.contrib.sites import requests
 from django.shortcuts import redirect, get_object_or_404
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -48,7 +47,7 @@ def wp_callback(request):
         user=request.user,
         defaults={"access_token": access_token, "refresh_token": refresh_token}
     )
-    return redirect("/create-dive-log/")  # 로그 작성 페이지로 이동
+    return redirect("/create-dive-log/")
 
 
 # --------------------------
@@ -84,7 +83,11 @@ class LogbookPostViewSet(viewsets.ViewSet):
 
         media_id = None
         if logbook.dive_image:
-            media_id = upload_image(token_obj.access_token, logbook.dive_image.path, logbook.dive_image.name)
+            media_id = upload_image(
+                token_obj.access_token,
+                logbook.dive_image.path,
+                logbook.dive_image.name
+            )
 
         title = logbook.dive_title
         content = f"""
@@ -106,4 +109,10 @@ class LogbookPostViewSet(viewsets.ViewSet):
         """
 
         post_url = post_to_wordpress(token_obj.access_token, title, content, media_id)
-        return Response({"wordpress_url": post_url}, status=status.HTTP_201_CREATED)
+
+        # Response에 UTF-8 명시
+        return Response(
+            {"wordpress_url": post_url},
+            status=status.HTTP_201_CREATED,
+            content_type="application/json; charset=utf-8"
+        )
