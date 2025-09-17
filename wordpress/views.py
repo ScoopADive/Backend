@@ -21,7 +21,6 @@ WP_REDIRECT_URI = settings.WP_REDIRECT_URI
 # --------------------------
 # WordPress OAuth
 # --------------------------
-@login_required
 def wp_login(request):
     auth_url = (
         f"https://public-api.wordpress.com/oauth2/authorize?"
@@ -79,16 +78,21 @@ class LogbookPostViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         logbook_id = serializer.validated_data['logbook_id']
 
-        logbook = get_object_or_404(Logbook, id=logbook_id, user=request.user)
-        token_obj = get_object_or_404(WordPressToken, user=request.user)
+        # WordPress 토큰 확인
+        try:
+            token_obj = WordPressToken.objects.get(user=request.user)
+        except WordPressToken.DoesNotExist:
+            return Response(
+                {"detail": "워드프레스 계정으로 로그인 후 사용하세요."},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        # access_token 안전하게 처리 (ASCII 강제)
-        safe_token = str(token_obj.access_token)
+        logbook = get_object_or_404(Logbook, id=logbook_id, user=request.user)
 
         media_id = None
         if logbook.dive_image:
             media_id = upload_image(
-                safe_token,
+                token_obj.access_token,
                 logbook.dive_image.path,
                 logbook.dive_image.name
             )
@@ -112,9 +116,8 @@ class LogbookPostViewSet(viewsets.ViewSet):
         <p>{logbook.feeling}</p>
         """
 
-        post_url = post_to_wordpress(safe_token, title, content, media_id)
+        post_url = post_to_wordpress(token_obj.access_token, title, content, media_id)
 
-        # UTF-8 안전하게 Response 반환
         return Response(
             {"wordpress_url": post_url},
             status=status.HTTP_201_CREATED,
