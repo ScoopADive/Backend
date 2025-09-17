@@ -1,16 +1,15 @@
-# myapp/views.py
-import requests
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.conf import settings
-from rest_framework.decorators import action
-from rest_framework.response import Response
-
-from logbook.models import Logbook
-from utils.wordpress import upload_image, post_to_wordpress
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+
 from .models import WordPressToken
 from .serializers import WordPressTokenSerializer, LogbookPostSerializer
+from logbook.models import Logbook
+from utils.wordpress import upload_image, post_to_wordpress
 
 WP_CLIENT_ID = settings.WP_CLIENT_ID
 WP_CLIENT_SECRET = settings.WP_CLIENT_SECRET
@@ -28,22 +27,21 @@ def wp_login(request):
 def wp_callback(request):
     code = request.GET.get("code")
     token_url = "https://public-api.wordpress.com/oauth2/token"
-    data = {
+    res = requests.post(token_url, data={
         "client_id": WP_CLIENT_ID,
         "redirect_uri": WP_REDIRECT_URI,
         "client_secret": WP_CLIENT_SECRET,
         "code": code,
         "grant_type": "authorization_code",
-    }
-    res = requests.post(token_url, data=data).json()
+    }).json()
     access_token = res["access_token"]
     refresh_token = res.get("refresh_token")
-    # DB 저장
-    token_obj, _ = WordPressToken.objects.update_or_create(
+
+    WordPressToken.objects.update_or_create(
         user=request.user,
         defaults={"access_token": access_token, "refresh_token": refresh_token}
     )
-    return redirect("/api/logbooks/")  # 로그 작성 페이지로 이동
+    return redirect("/create-dive-log/")
 
 class WordPressTokenViewSet(viewsets.ModelViewSet):
     queryset = WordPressToken.objects.all()
@@ -51,24 +49,23 @@ class WordPressTokenViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # 본인 것만 보이게 제한
         return WordPressToken.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-
 class LogbookPostViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
+    @swagger_auto_schema(request_body=LogbookPostSerializer)
     @action(detail=False, methods=['post'])
     def post_to_wp(self, request):
         serializer = LogbookPostSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         logbook_id = serializer.validated_data['logbook_id']
 
-        logbook = Logbook.objects.get(id=logbook_id, user=request.user)
-        token_obj = WordPressToken.objects.get(user=request.user)
+        logbook = get_object_or_404(Logbook, id=logbook_id, user=request.user)
+        token_obj = get_object_or_404(WordPressToken, user=request.user)
 
         media_id = None
         if logbook.dive_image:
