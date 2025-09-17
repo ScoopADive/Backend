@@ -1,3 +1,5 @@
+import requests
+import json
 from django.shortcuts import redirect, get_object_or_404
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -15,6 +17,10 @@ WP_CLIENT_ID = settings.WP_CLIENT_ID
 WP_CLIENT_SECRET = settings.WP_CLIENT_SECRET
 WP_REDIRECT_URI = settings.WP_REDIRECT_URI
 
+
+# --------------------------
+# WordPress OAuth
+# --------------------------
 @login_required
 def wp_login(request):
     auth_url = (
@@ -22,6 +28,7 @@ def wp_login(request):
         f"client_id={WP_CLIENT_ID}&response_type=code&redirect_uri={WP_REDIRECT_URI}"
     )
     return redirect(auth_url)
+
 
 @login_required
 def wp_callback(request):
@@ -41,8 +48,12 @@ def wp_callback(request):
         user=request.user,
         defaults={"access_token": access_token, "refresh_token": refresh_token}
     )
-    return redirect("/create-dive-log/")
+    return redirect("/create-dive-log/")  # 로그 작성 페이지로 이동
 
+
+# --------------------------
+# WordPressToken ViewSet
+# --------------------------
 class WordPressTokenViewSet(viewsets.ModelViewSet):
     queryset = WordPressToken.objects.all()
     serializer_class = WordPressTokenSerializer
@@ -54,6 +65,10 @@ class WordPressTokenViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
+# --------------------------
+# Logbook → WordPress 포스트
+# --------------------------
 class LogbookPostViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
