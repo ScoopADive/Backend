@@ -17,13 +17,9 @@ def upload_image(access_token, image_path, image_name):
 
 
 def post_to_wordpress(access_token, title, content, media_id=None):
-    """
-    WordPress 글 작성 (UTF-8 안전)
-    """
     url = f"{WP_API_BASE.format(site_id='me')}/posts/new"
     headers = {
         "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
     }
     data = {
         "title": title,
@@ -33,6 +29,8 @@ def post_to_wordpress(access_token, title, content, media_id=None):
     if media_id:
         data["media[]"] = media_id
 
-    res = requests.post(url, headers=headers, data=json.dumps(data, ensure_ascii=False))
+    # json 파라미터 사용 → UTF-8 안전
+    res = requests.post(url, headers=headers, json=data)
     res.raise_for_status()
     return res.json()["URL"]
+
