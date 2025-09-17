@@ -1,4 +1,4 @@
-from django.contrib.sites import requests
+import requests
 from django.shortcuts import redirect, get_object_or_404
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -82,10 +82,13 @@ class LogbookPostViewSet(viewsets.ViewSet):
         logbook = get_object_or_404(Logbook, id=logbook_id, user=request.user)
         token_obj = get_object_or_404(WordPressToken, user=request.user)
 
+        # access_token 안전하게 처리 (ASCII 강제)
+        safe_token = str(token_obj.access_token)
+
         media_id = None
         if logbook.dive_image:
             media_id = upload_image(
-                token_obj.access_token,
+                safe_token,
                 logbook.dive_image.path,
                 logbook.dive_image.name
             )
@@ -109,13 +112,11 @@ class LogbookPostViewSet(viewsets.ViewSet):
         <p>{logbook.feeling}</p>
         """
 
-        post_url = post_to_wordpress(token_obj.access_token, title, content, media_id)
-        post_url.encode('utf-8').decode('utf-8')
+        post_url = post_to_wordpress(safe_token, title, content, media_id)
 
-        # Response에 UTF-8 명시
+        # UTF-8 안전하게 Response 반환
         return Response(
-            JSONRenderer().render({"wordpress_url": post_url}),
+            {"wordpress_url": post_url},
             status=status.HTTP_201_CREATED,
             content_type="application/json; charset=utf-8"
         )
-
