@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
@@ -109,10 +110,12 @@ class LogbookPostViewSet(viewsets.ViewSet):
         """
 
         post_url = post_to_wordpress(token_obj.access_token, title, content, media_id)
+        post_url.encode('utf-8').decode('utf-8')
 
         # Response에 UTF-8 명시
         return Response(
-            {"wordpress_url": post_url},
+            JSONRenderer().render({"wordpress_url": post_url}),
             status=status.HTTP_201_CREATED,
             content_type="application/json; charset=utf-8"
         )
+
