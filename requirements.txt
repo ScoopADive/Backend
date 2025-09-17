@@ -17,5 +17,6 @@ django-extensions
 Pillow
 django-cors-headers
 cryptography
+python-decouple
 
 

@@ -14,7 +14,6 @@ from pathlib import Path
 
 import environ
 import os
-
 from django.conf.global_settings import SECRET_KEY
 
 env = environ.Env(
@@ -37,6 +36,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY') # 기본 사용방법
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# WordPress
+WP_CLIENT_ID = os.environ.get("WP_CLIENT_ID")
+WP_CLIENT_SECRET = os.environ.get("WP_CLIENT_SECRET")
+WP_REDIRECT_URI = os.environ.get("WP_REDIRECT_URI")
+
+
 ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', '13.125.160.47', 'localhost', 'www.scoopadive.com', 'scoopadive.com', 'web']
 
 AUTH_USER_MODEL = 'auths.User'
@@ -49,6 +54,7 @@ INSTALLED_APPS = [
     "mypage.apps.MypageConfig",
     "home.apps.HomeConfig",
     "search.apps.SearchConfig",
+    "wordpress.apps.WordpressConfig",
     # auths
     "rest_framework",
     # swagger

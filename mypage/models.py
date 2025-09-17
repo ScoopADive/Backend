@@ -6,7 +6,7 @@ User = settings.AUTH_USER_MODEL
 
 # Create your models here.
 class BucketList(models.Model):
-    user = models.ForeignKey(User, related_name='bucketlists', on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bucketlists')
     title = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -14,7 +14,7 @@ class BucketList(models.Model):
         return self.title
 
 class Friend(models.Model):
-    user = models.ForeignKey(User, related_name='friends', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='friends')
     friend = models.ForeignKey(User, related_name='friend_of', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -29,7 +29,7 @@ class Friend(models.Model):
 
 
 class SkillSet(models.Model):
-    user = models.ForeignKey(User, related_name='skills', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='skill_sets')
     skill = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
 

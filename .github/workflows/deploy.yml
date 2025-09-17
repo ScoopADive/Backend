@@ -48,7 +48,11 @@ jobs:
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_REDIRECT=${{ secrets.GOOGLE_REDIRECT }}
             GOOGLE_CALLBACK_URI=${{ secrets.GOOGLE_CALLBACK_URI }}
-            GOOGLE_SECRET=${{secrets.GOOGLE_SECRET }}
+            GOOGLE_SECRET=${{ secrets.GOOGLE_SECRET }}
+
+            WP_CLIENT_ID=${{ secrets.WP_CLIENT_ID }}
+            WP_CLIENT_SECRET=${{ secrets.WP_CLIENT_SECRET }}
+            WP_REDIRECT_URI=${{ secrets.WP_REDIRECT_URI }}
             
             DB_NAME=${{ secrets.DB_NAME }}
             DB_USER=${{ secrets.DB_USER }}
@@ -67,7 +71,6 @@ jobs:
             
             echo "==> 최신 이미지 기반 컨테이너 다시 실행"
             sudo docker-compose up -d
-
 
             echo "==> 마이그레이션 실행"
             sudo docker-compose exec -T web python manage.py migrate

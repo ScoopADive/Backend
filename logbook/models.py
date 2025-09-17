@@ -20,7 +20,7 @@ class DiveCenter(models.Model):
         return self.name
 
 class Logbook(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='own_logbooks')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='own_logbooks')
     dive_image = models.ImageField(upload_to='logbooks_images', null=True, blank=True)
     feeling = models.TextField(null=True, blank=True)
     # buddy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='buddy_logbooks')
@@ -37,8 +37,7 @@ class Logbook(models.Model):
     start_pressure = models.PositiveSmallIntegerField()
     end_pressure = models.PositiveSmallIntegerField()
     dive_center = models.ForeignKey(DiveCenter, on_delete=models.SET_NULL, null=True, blank=True)
-    likes = models.ManyToManyField(User, related_name="liked_logbooks", blank=True)
-
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="liked_logbooks", blank=True)
 
     def total_likes(self):
         return self.likes.count()
