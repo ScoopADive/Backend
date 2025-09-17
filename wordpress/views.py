@@ -28,7 +28,6 @@ def wp_login(request):
     return redirect(auth_url)
 
 
-@login_required
 def wp_callback(request):
     code = request.GET.get("code")
     token_url = "https://public-api.wordpress.com/oauth2/token"
