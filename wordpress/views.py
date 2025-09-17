@@ -38,14 +38,26 @@ def wp_callback(request):
         "code": code,
         "grant_type": "authorization_code",
     }).json()
-    access_token = res["access_token"]
+    access_token = res.get("access_token")
     refresh_token = res.get("refresh_token")
 
+    # 로그인 여부 체크
+    if request.user.is_authenticated:
+        user = request.user
+    else:
+        # 로그인 안 된 상태 → 세션에 토큰 임시 저장
+        request.session['wp_access_token'] = access_token
+        request.session['wp_refresh_token'] = refresh_token
+        return redirect("/login/")  # 사용자 로그인 후 DB에 연결
+
+    # 로그인되어 있는 경우 DB 저장
     WordPressToken.objects.update_or_create(
-        user=request.user,
+        user=user,
         defaults={"access_token": access_token, "refresh_token": refresh_token}
     )
+
     return redirect("/api/logbooks/")
+
 
 
 # --------------------------
