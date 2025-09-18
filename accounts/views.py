@@ -18,19 +18,20 @@ class GoogleLoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
-        # Swagger 모드 확인 (?swagger=1 붙이면 callback에도 같이 전달됨)
-        swagger_flag = "&swagger=1" if request.GET.get("swagger") == "1" else ""
+        state = "swagger" if request.GET.get("swagger") == "1" else ""
 
-        # 구글 로그인 페이지 URL
         auth_url = (
             f"{GOOGLE_REDIRECT}?response_type=code"
             f"&client_id={GOOGLE_CLIENT_ID}"
-            f"&redirect_uri={GOOGLE_CALLBACK_URI}{swagger_flag}"
+            f"&redirect_uri={GOOGLE_CALLBACK_URI}"
             f"&scope=email%20profile%20openid"
             f"&access_type=offline"
             f"&prompt=consent"
         )
+        if state:
+            auth_url += f"&state={state}"   # 👈 여기 추가
         return redirect(auth_url)
+
 
 
 # --------------------------
