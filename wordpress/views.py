@@ -1,11 +1,9 @@
 import requests
 from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
@@ -13,124 +11,97 @@ from .models import WordPressToken
 from .serializers import WordPressTokenSerializer, LogbookPostSerializer
 from logbook.models import Logbook
 from utils.wordpress import upload_image, post_to_wordpress
+from django.conf import settings
 
 WP_CLIENT_ID = settings.WP_CLIENT_ID
 WP_CLIENT_SECRET = settings.WP_CLIENT_SECRET
 WP_REDIRECT_URI = settings.WP_REDIRECT_URI
 
-
 # --------------------------
-# WordPress OAuth
+# 브라우저용 WordPress OAuth
 # --------------------------
-from drf_yasg.utils import swagger_auto_schema
-
-@swagger_auto_schema(
-    method='get',
-    operation_description="WordPress OAuth 로그인 시작"
-)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def wp_login(request):
-    state = request.GET.get("state", "")
+    """브라우저용: OAuth 승인 페이지로 리다이렉트"""
     auth_url = (
         f"https://public-api.wordpress.com/oauth2/authorize?"
-        f"client_id={WP_CLIENT_ID}"
-        f"&response_type=code"
+        f"client_id={WP_CLIENT_ID}&response_type=code"
         f"&redirect_uri={WP_REDIRECT_URI}"
     )
-    if state:
-        auth_url += f"&state={state}"
     return redirect(auth_url)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def wp_login_swagger(request):
-    """
-    Swagger 전용: 클릭 한 번으로 WordPress 승인 URL 확인
-    """
-    auth_url = (
-        f"https://public-api.wordpress.com/oauth2/authorize?"
-        f"client_id={WP_CLIENT_ID}"
-        f"&response_type=code"
-        f"&redirect_uri={WP_REDIRECT_URI}"
-        f"&state=swagger"
-    )
-    return JsonResponse({"auth_url": auth_url})
-
-
-
-
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def wp_callback(request):
+    """브라우저용: OAuth 콜백 처리 후 DB 저장"""
     code = request.GET.get("code")
-    state = request.GET.get("state")  # Swagger 테스트용
-
     if not code:
         return JsonResponse({"detail": "WordPress OAuth code missing"}, status=400)
 
-    # Access Token 요청
-    token_url = "https://public-api.wordpress.com/oauth2/token"
-    res = requests.post(token_url, data={
-        "client_id": WP_CLIENT_ID,
-        "client_secret": WP_CLIENT_SECRET,
-        "redirect_uri": WP_REDIRECT_URI,
-        "code": code,
-        "grant_type": "authorization_code",
-    }).json()
+    res = requests.post(
+        "https://public-api.wordpress.com/oauth2/token",
+        data={
+            "client_id": WP_CLIENT_ID,
+            "client_secret": WP_CLIENT_SECRET,
+            "redirect_uri": WP_REDIRECT_URI,
+            "code": code,
+            "grant_type": "authorization_code",
+        }
+    ).json()
 
     access_token = res.get("access_token")
     refresh_token = res.get("refresh_token")
-
     if not access_token:
         return JsonResponse({"detail": "WordPress token request failed"}, status=400)
 
-    # DB에 저장
     WordPressToken.objects.update_or_create(
         user=request.user,
         defaults={"access_token": access_token, "refresh_token": refresh_token}
     )
 
-    # Swagger 테스트용 JSON
-    if state == "swagger":
-        return JsonResponse({
-            "access_token": access_token,
-            "refresh_token": refresh_token
-        })
-
     return redirect("https://scoopadive.com/home")
 
+
+# --------------------------
+# Swagger용 WordPress OAuth
+# --------------------------
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def wp_login_swagger(request):
+    """Swagger용: OAuth 승인 URL JSON 반환"""
+    auth_url = (
+        f"https://public-api.wordpress.com/oauth2/authorize?"
+        f"client_id={WP_CLIENT_ID}&response_type=code"
+        f"&redirect_uri={WP_REDIRECT_URI}"
+        f"&state=swagger"
+    )
+    return JsonResponse({"auth_url": auth_url})
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def wp_callback_swagger(request):
-    """
-    Swagger 전용: 승인 코드로 WordPress 토큰 발급 및 DB 저장
-    """
+    """Swagger용: 승인 코드로 WordPress 토큰 발급 및 DB 저장"""
     code = request.GET.get("code")
     if not code:
         return JsonResponse({"detail": "WordPress OAuth code missing"}, status=400)
 
-    # WordPress 토큰 요청
-    token_url = "https://public-api.wordpress.com/oauth2/token"
-    res = requests.post(token_url, data={
-        "client_id": WP_CLIENT_ID,
-        "client_secret": WP_CLIENT_SECRET,
-        "redirect_uri": WP_REDIRECT_URI,
-        "code": code,
-        "grant_type": "authorization_code",
-    }).json()
+    res = requests.post(
+        "https://public-api.wordpress.com/oauth2/token",
+        data={
+            "client_id": WP_CLIENT_ID,
+            "client_secret": WP_CLIENT_SECRET,
+            "redirect_uri": WP_REDIRECT_URI,
+            "code": code,
+            "grant_type": "authorization_code",
+        }
+    ).json()
 
     access_token = res.get("access_token")
     refresh_token = res.get("refresh_token")
-
     if not access_token:
         return JsonResponse({"detail": "WordPress token request failed"}, status=400)
 
-    # DB 저장
     WordPressToken.objects.update_or_create(
         user=request.user,
         defaults={"access_token": access_token, "refresh_token": refresh_token}
@@ -164,13 +135,11 @@ class LogbookPostViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     @swagger_auto_schema(request_body=LogbookPostSerializer)
-    @action(detail=False, methods=['post'])
     def post_to_wp(self, request):
         serializer = LogbookPostSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         logbook_id = serializer.validated_data['logbook_id']
 
-        # WordPress 토큰 확인
         try:
             token_obj = WordPressToken.objects.get(user=request.user)
         except WordPressToken.DoesNotExist:
@@ -212,6 +181,5 @@ class LogbookPostViewSet(viewsets.ViewSet):
 
         return Response(
             {"wordpress_url": post_url},
-            status=status.HTTP_201_CREATED,
-            content_type="application/json; charset=utf-8"
+            status=status.HTTP_201_CREATED
         )
