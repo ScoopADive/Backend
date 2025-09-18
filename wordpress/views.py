@@ -67,9 +67,8 @@ def wp_callback(request):
 # Swagger용 WordPress OAuth
 # --------------------------
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def wp_login_swagger(request):
-    """Swagger용: OAuth 승인 URL JSON 반환"""
+    """Swagger 전용: JWT 없이 OAuth URL 확인"""
     auth_url = (
         f"https://public-api.wordpress.com/oauth2/authorize?"
         f"client_id={WP_CLIENT_ID}&response_type=code"
@@ -77,6 +76,7 @@ def wp_login_swagger(request):
         f"&state=swagger"
     )
     return JsonResponse({"auth_url": auth_url})
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
