@@ -4,7 +4,8 @@ from django.shortcuts import redirect, get_object_or_404
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
@@ -27,11 +28,9 @@ from drf_yasg.utils import swagger_auto_schema
     method='get',
     operation_description="WordPress OAuth 로그인 시작"
 )
-@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def wp_login(request):
-    """
-    Swagger 테스트 시 ?state=swagger 붙이면 콜백에서 JSON 반환
-    """
     state = request.GET.get("state", "")
     auth_url = (
         f"https://public-api.wordpress.com/oauth2/authorize?"
@@ -44,9 +43,28 @@ def wp_login(request):
     return redirect(auth_url)
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def wp_login_swagger(request):
+    """
+    Swagger 전용: 클릭 한 번으로 WordPress 승인 URL 확인
+    """
+    auth_url = (
+        f"https://public-api.wordpress.com/oauth2/authorize?"
+        f"client_id={WP_CLIENT_ID}"
+        f"&response_type=code"
+        f"&redirect_uri={WP_REDIRECT_URI}"
+        f"&state=swagger"
+    )
+    return JsonResponse({"auth_url": auth_url})
 
 
-@login_required
+
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def wp_callback(request):
     code = request.GET.get("code")
     state = request.GET.get("state")  # Swagger 테스트용
@@ -84,6 +102,44 @@ def wp_callback(request):
         })
 
     return redirect("https://scoopadive.com/home")
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def wp_callback_swagger(request):
+    """
+    Swagger 전용: 승인 코드로 WordPress 토큰 발급 및 DB 저장
+    """
+    code = request.GET.get("code")
+    if not code:
+        return JsonResponse({"detail": "WordPress OAuth code missing"}, status=400)
+
+    # WordPress 토큰 요청
+    token_url = "https://public-api.wordpress.com/oauth2/token"
+    res = requests.post(token_url, data={
+        "client_id": WP_CLIENT_ID,
+        "client_secret": WP_CLIENT_SECRET,
+        "redirect_uri": WP_REDIRECT_URI,
+        "code": code,
+        "grant_type": "authorization_code",
+    }).json()
+
+    access_token = res.get("access_token")
+    refresh_token = res.get("refresh_token")
+
+    if not access_token:
+        return JsonResponse({"detail": "WordPress token request failed"}, status=400)
+
+    # DB 저장
+    WordPressToken.objects.update_or_create(
+        user=request.user,
+        defaults={"access_token": access_token, "refresh_token": refresh_token}
+    )
+
+    return JsonResponse({
+        "access_token": access_token,
+        "refresh_token": refresh_token
+    })
 
 
 # --------------------------
