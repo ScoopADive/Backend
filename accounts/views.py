@@ -42,6 +42,8 @@ class GoogleCallbackView(APIView):
 
     def get(self, request):
         code = request.GET.get("code")
+        state = request.GET.get("state")
+
         if not code:
             return redirect(f"{FRONTEND_URL}/login?error=auth_code_missing")
 
@@ -94,7 +96,7 @@ class GoogleCallbackView(APIView):
         access_token_str = str(refresh.access_token)
 
         # 6️⃣ Swagger 모드면 JSON 반환
-        if request.GET.get("swagger") == "1":
+        if state == "swagger":  # 👈 Swagger 모드일 때만 JSON
             return JsonResponse({
                 "access": access_token_str,
                 "refresh": str(refresh),
