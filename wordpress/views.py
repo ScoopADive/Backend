@@ -1,4 +1,5 @@
 import requests
+from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -20,44 +21,69 @@ WP_REDIRECT_URI = settings.WP_REDIRECT_URI
 # --------------------------
 # WordPress OAuth
 # --------------------------
+from drf_yasg.utils import swagger_auto_schema
+
+@swagger_auto_schema(
+    method='get',
+    operation_description="WordPress OAuth 로그인 시작"
+)
+@login_required
 def wp_login(request):
+    """
+    Swagger 테스트 시 ?state=swagger 붙이면 콜백에서 JSON 반환
+    """
+    state = request.GET.get("state", "")
     auth_url = (
         f"https://public-api.wordpress.com/oauth2/authorize?"
-        f"client_id={WP_CLIENT_ID}&response_type=code&redirect_uri={WP_REDIRECT_URI}"
+        f"client_id={WP_CLIENT_ID}"
+        f"&response_type=code"
+        f"&redirect_uri={WP_REDIRECT_URI}"
     )
+    if state:
+        auth_url += f"&state={state}"
     return redirect(auth_url)
 
 
+
+
+@login_required
 def wp_callback(request):
     code = request.GET.get("code")
+    state = request.GET.get("state")  # Swagger 테스트용
+
+    if not code:
+        return JsonResponse({"detail": "WordPress OAuth code missing"}, status=400)
+
+    # Access Token 요청
     token_url = "https://public-api.wordpress.com/oauth2/token"
     res = requests.post(token_url, data={
         "client_id": WP_CLIENT_ID,
-        "redirect_uri": WP_REDIRECT_URI,
         "client_secret": WP_CLIENT_SECRET,
+        "redirect_uri": WP_REDIRECT_URI,
         "code": code,
         "grant_type": "authorization_code",
     }).json()
+
     access_token = res.get("access_token")
     refresh_token = res.get("refresh_token")
 
-    # 로그인 여부 체크
-    if request.user.is_authenticated:
-        user = request.user
-    else:
-        # 로그인 안 된 상태 → 세션에 토큰 임시 저장
-        request.session['wp_access_token'] = access_token
-        request.session['wp_refresh_token'] = refresh_token
-        return redirect("/login/")  # 사용자 로그인 후 DB에 연결
+    if not access_token:
+        return JsonResponse({"detail": "WordPress token request failed"}, status=400)
 
-    # 로그인되어 있는 경우 DB 저장
+    # DB에 저장
     WordPressToken.objects.update_or_create(
-        user=user,
+        user=request.user,
         defaults={"access_token": access_token, "refresh_token": refresh_token}
     )
 
-    return redirect("/api/logbooks/")
+    # Swagger 테스트용 JSON
+    if state == "swagger":
+        return JsonResponse({
+            "access_token": access_token,
+            "refresh_token": refresh_token
+        })
 
+    return redirect("https://scoopadive.com/home")
 
 
 # --------------------------
