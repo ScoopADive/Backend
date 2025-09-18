@@ -2,7 +2,7 @@ import requests
 from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
@@ -67,6 +67,7 @@ def wp_callback(request):
 # Swagger용 WordPress OAuth
 # --------------------------
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def wp_login_swagger(request):
     """Swagger 전용: JWT 없이 OAuth URL 확인"""
     auth_url = (
@@ -79,6 +80,7 @@ def wp_login_swagger(request):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def wp_callback_swagger(request):
     """Swagger용: 승인 코드로 WordPress 토큰 발급만"""
     code = request.GET.get("code")
