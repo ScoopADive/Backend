@@ -79,9 +79,8 @@ def wp_login_swagger(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def wp_callback_swagger(request):
-    """Swagger용: 승인 코드로 WordPress 토큰 발급 및 DB 저장"""
+    """Swagger용: 승인 코드로 WordPress 토큰 발급만"""
     code = request.GET.get("code")
     if not code:
         return JsonResponse({"detail": "WordPress OAuth code missing"}, status=400)
@@ -102,16 +101,10 @@ def wp_callback_swagger(request):
     if not access_token:
         return JsonResponse({"detail": "WordPress token request failed"}, status=400)
 
-    WordPressToken.objects.update_or_create(
-        user=request.user,
-        defaults={"access_token": access_token, "refresh_token": refresh_token}
-    )
-
     return JsonResponse({
         "access_token": access_token,
         "refresh_token": refresh_token
     })
-
 
 # --------------------------
 # WordPressToken ViewSet
