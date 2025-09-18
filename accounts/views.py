@@ -8,18 +8,24 @@ from allauth.socialaccount.models import SocialAccount
 from auths.models import User
 from scoopadive.settings import GOOGLE_REDIRECT, GOOGLE_CLIENT_ID, GOOGLE_CALLBACK_URI, GOOGLE_SECRET
 
-
 FRONTEND_URL = "https://scoopadive.com"  # 메인 페이지 URL
 
+
+# --------------------------
+# 1. 구글 로그인 시작
+# --------------------------
 class GoogleLoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
-        # 구글 로그인 페이지로 바로 redirect
+        # Swagger 모드 확인 (?swagger=1 붙이면 callback에도 같이 전달됨)
+        swagger_flag = "&swagger=1" if request.GET.get("swagger") == "1" else ""
+
+        # 구글 로그인 페이지 URL
         auth_url = (
             f"{GOOGLE_REDIRECT}?response_type=code"
             f"&client_id={GOOGLE_CLIENT_ID}"
-            f"&redirect_uri={GOOGLE_CALLBACK_URI}"
+            f"&redirect_uri={GOOGLE_CALLBACK_URI}{swagger_flag}"
             f"&scope=email%20profile%20openid"
             f"&access_type=offline"
             f"&prompt=consent"
@@ -27,6 +33,9 @@ class GoogleLoginView(APIView):
         return redirect(auth_url)
 
 
+# --------------------------
+# 2. 구글 OAuth 콜백
+# --------------------------
 class GoogleCallbackView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -66,7 +75,7 @@ class GoogleCallbackView(APIView):
         if not email:
             return redirect(f"{FRONTEND_URL}/login?error=no_email")
 
-        # 3️⃣ User 생성
+        # 3️⃣ User 생성 or 가져오기
         user, _ = User.objects.get_or_create(
             email=email,
             defaults={"username": username, "is_active": True}
@@ -83,7 +92,17 @@ class GoogleCallbackView(APIView):
         refresh = RefreshToken.for_user(user)
         access_token_str = str(refresh.access_token)
 
-        # 6️⃣ 프론트로 redirect (JWT + 사용자 정보 포함)
+        # 6️⃣ Swagger 모드면 JSON 반환
+        if request.GET.get("swagger") == "1":
+            return JsonResponse({
+                "access": access_token_str,
+                "refresh": str(refresh),
+                "email": email,
+                "username": username,
+                "id": user.id,
+            })
+
+        # 7️⃣ 기본은 프론트엔드로 redirect
         frontend_redirect_url = (
             f"{FRONTEND_URL}/oauth2/redirect?"
             f"token={access_token_str}"
