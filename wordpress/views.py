@@ -1,7 +1,7 @@
 import requests
 from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
@@ -130,6 +130,7 @@ class WordPressTokenViewSet(viewsets.ModelViewSet):
 class LogbookPostViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
+    @action(detail=False, methods=['post'])
     @swagger_auto_schema(request_body=LogbookPostSerializer)
     def post_to_wp(self, request):
         serializer = LogbookPostSerializer(data=request.data)
