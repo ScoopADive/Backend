@@ -40,7 +40,7 @@ DEBUG = True
 WP_CLIENT_ID = os.environ.get("WP_CLIENT_ID")
 WP_CLIENT_SECRET = os.environ.get("WP_CLIENT_SECRET")
 WP_REDIRECT_URI = os.environ.get("WP_REDIRECT_URI")
-
+WP_REDIRECT_URI_SWAGGER = os.environ.get("WP_REDIRECT_URI_SWAGGER")
 
 ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', '13.125.160.47', 'localhost', 'www.scoopadive.com', 'scoopadive.com', 'web']
 
