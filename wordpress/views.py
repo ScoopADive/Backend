@@ -16,6 +16,7 @@ from django.conf import settings
 WP_CLIENT_ID = settings.WP_CLIENT_ID
 WP_CLIENT_SECRET = settings.WP_CLIENT_SECRET
 WP_REDIRECT_URI = settings.WP_REDIRECT_URI
+WP_REDIRECT_URI_SWAGGER = settings.WP_REDIRECT_URI_SWAGGER
 
 # --------------------------
 # 브라우저용 WordPress OAuth
@@ -73,7 +74,7 @@ def wp_login_swagger(request):
     auth_url = (
         f"https://public-api.wordpress.com/oauth2/authorize?"
         f"client_id={WP_CLIENT_ID}&response_type=code"
-        f"&redirect_uri={WP_REDIRECT_URI}"
+        f"&redirect_uri={WP_REDIRECT_URI_SWAGGER}"
         f"&state=swagger"
     )
     return JsonResponse({"auth_url": auth_url})
@@ -92,7 +93,7 @@ def wp_callback_swagger(request):
         data={
             "client_id": WP_CLIENT_ID,
             "client_secret": WP_CLIENT_SECRET,
-            "redirect_uri": WP_REDIRECT_URI,
+            "redirect_uri": WP_REDIRECT_URI_SWAGGER,
             "code": code,
             "grant_type": "authorization_code",
         }
