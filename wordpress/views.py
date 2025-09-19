@@ -10,13 +10,14 @@ from drf_yasg.utils import swagger_auto_schema
 from .models import WordPressToken
 from .serializers import WordPressTokenSerializer, LogbookPostSerializer
 from logbook.models import Logbook
-from utils.wordpress import upload_image, post_to_wordpress
+from utils.wordpress import upload_image
 from django.conf import settings
 
 WP_CLIENT_ID = settings.WP_CLIENT_ID
 WP_CLIENT_SECRET = settings.WP_CLIENT_SECRET
 WP_REDIRECT_URI = settings.WP_REDIRECT_URI
 WP_REDIRECT_URI_SWAGGER = settings.WP_REDIRECT_URI_SWAGGER
+
 
 # --------------------------
 # 브라우저용 WordPress OAuth
@@ -31,6 +32,7 @@ def wp_login(request):
         f"&redirect_uri={WP_REDIRECT_URI}"
     )
     return redirect(auth_url)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -109,6 +111,7 @@ def wp_callback_swagger(request):
         "refresh_token": refresh_token
     })
 
+
 # --------------------------
 # WordPressToken ViewSet
 # --------------------------
@@ -122,6 +125,37 @@ class WordPressTokenViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+# --------------------------
+# WordPress 포스트 업로드 함수
+# --------------------------
+def post_to_wordpress(access_token, title, content, media_id=None):
+    # 연결된 사이트 ID 확인
+    site_res = requests.get(
+        "https://public-api.wordpress.com/rest/v1.1/me/sites",
+        headers={"Authorization": f"Bearer {access_token}"}
+    ).json()
+
+    if not site_res.get("sites"):
+        raise ValueError("WordPress site not found")
+
+    site_id = site_res["sites"][0]["ID"]  # 첫 번째 사이트 선택
+
+    post_data = {
+        "title": title,
+        "content": content,
+        "status": "publish"
+    }
+
+    if media_id:
+        post_data["media_ids"] = [media_id]
+
+    url = f"https://public-api.wordpress.com/rest/v1.1/sites/{site_id}/posts/new"
+
+    res = requests.post(url, headers={"Authorization": f"Bearer {access_token}"}, data=post_data)
+    res.raise_for_status()
+    return res.json().get("URL")
 
 
 # --------------------------
