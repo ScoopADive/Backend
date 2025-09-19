@@ -53,6 +53,7 @@ jobs:
             WP_CLIENT_ID=${{ secrets.WP_CLIENT_ID }}
             WP_CLIENT_SECRET=${{ secrets.WP_CLIENT_SECRET }}
             WP_REDIRECT_URI=${{ secrets.WP_REDIRECT_URI }}
+            WP_REDIRECT_URI_SWAGGER=${{ secrets.WP_REDIRECT_URI_SWAGGER }}
             
             DB_NAME=${{ secrets.DB_NAME }}
             DB_USER=${{ secrets.DB_USER }}
