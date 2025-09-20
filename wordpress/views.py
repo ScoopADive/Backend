@@ -170,9 +170,9 @@ class LogbookPostViewSet(viewsets.ViewSet):
         # 사용자 토큰 가져오기 (첫 번째)
         token_obj = WordPressToken.objects.filter(user=request.user).first()
         if not token_obj:
-            return Response({"detail": "워드프레스 계정으로 로그인 후 사용하세요."},
-                            status=status.HTTP_403_FORBIDDEN)
-        access_token = token_obj.access_token.strip()
+            return Response({"detail": "워드프레스 계정 로그인 필요"}, status=403)
+
+        access_token = token_obj.access_token.strip()  # token 공백 제거
 
         logbook = get_object_or_404(Logbook, id=logbook_id, user=request.user)
 
@@ -201,5 +201,12 @@ class LogbookPostViewSet(viewsets.ViewSet):
         <p>{logbook.feeling}</p>
         """
 
-        post_url = post_to_wordpress(access_token, title, content, media_id)
+        try:
+            post_url = post_to_wordpress(access_token, title, content, media_id)
+        except requests.HTTPError as e:
+            return Response(
+                {"detail": f"WordPress API error: {e.response.status_code} - {e.response.text}"},
+                status=e.response.status_code
+            )
+
         return Response({"wordpress_url": post_url}, status=status.HTTP_201_CREATED)
