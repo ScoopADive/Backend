@@ -1,17 +1,15 @@
 import requests
 from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404
-from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
 
+from django.conf import settings
+from logbook.models import Logbook
 from .models import WordPressToken
 from .serializers import WordPressTokenSerializer, LogbookPostSerializer
-from logbook.models import Logbook
 from utils.wordpress import upload_image
-from django.conf import settings
 
 WP_CLIENT_ID = settings.WP_CLIENT_ID
 WP_CLIENT_SECRET = settings.WP_CLIENT_SECRET
@@ -20,22 +18,23 @@ WP_REDIRECT_URI_SWAGGER = settings.WP_REDIRECT_URI_SWAGGER
 
 
 # --------------------------
-# 브라우저용 WordPress OAuth
+# 브라우저용 OAuth
 # --------------------------
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([permissions.IsAuthenticated])
 def wp_login(request):
-    """브라우저용: OAuth 승인 페이지로 리다이렉트"""
+    """브라우저용: WordPress OAuth 승인 페이지로 리다이렉트"""
     auth_url = (
         f"https://public-api.wordpress.com/oauth2/authorize?"
         f"client_id={WP_CLIENT_ID}&response_type=code"
         f"&redirect_uri={WP_REDIRECT_URI}"
+        f"&scope=global posts"
     )
     return redirect(auth_url)
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([permissions.IsAuthenticated])
 def wp_callback(request):
     """브라우저용: OAuth 콜백 처리 후 DB 저장"""
     code = request.GET.get("code")
@@ -51,41 +50,43 @@ def wp_callback(request):
             "code": code,
             "grant_type": "authorization_code",
         }
-    ).json()
+    )
+    res.raise_for_status()
+    data = res.json()
 
-    access_token = res.get("access_token")
-    refresh_token = res.get("refresh_token")
+    access_token = data.get("access_token")
+    refresh_token = data.get("refresh_token")
     if not access_token:
         return JsonResponse({"detail": "WordPress token request failed"}, status=400)
 
-    WordPressToken.objects.update_or_create(
-        user=request.user,
-        defaults={"access_token": access_token, "refresh_token": refresh_token}
-    )
+    # 기존 토큰 삭제 후 저장
+    WordPressToken.objects.filter(user=request.user).delete()
+    WordPressToken.objects.create(user=request.user, access_token=access_token, refresh_token=refresh_token)
 
     return redirect("https://scoopadive.com/home")
 
 
 # --------------------------
-# Swagger용 WordPress OAuth
+# Swagger용 OAuth
 # --------------------------
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([permissions.AllowAny])
 def wp_login_swagger(request):
-    """Swagger 전용: JWT 없이 OAuth URL 확인"""
+    """Swagger 전용: OAuth URL 반환"""
     auth_url = (
         f"https://public-api.wordpress.com/oauth2/authorize?"
         f"client_id={WP_CLIENT_ID}&response_type=code"
         f"&redirect_uri={WP_REDIRECT_URI_SWAGGER}"
+        f"&scope=global posts"
         f"&state=swagger"
     )
     return JsonResponse({"auth_url": auth_url})
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([permissions.AllowAny])
 def wp_callback_swagger(request):
-    """Swagger용: 승인 코드로 WordPress 토큰 발급만"""
+    """Swagger 전용: 승인 코드로 access_token 반환"""
     code = request.GET.get("code")
     if not code:
         return JsonResponse({"detail": "WordPress OAuth code missing"}, status=400)
@@ -99,17 +100,15 @@ def wp_callback_swagger(request):
             "code": code,
             "grant_type": "authorization_code",
         }
-    ).json()
-
-    access_token = res.get("access_token")
-    refresh_token = res.get("refresh_token")
+    )
+    res.raise_for_status()
+    data = res.json()
+    access_token = data.get("access_token")
+    refresh_token = data.get("refresh_token")
     if not access_token:
         return JsonResponse({"detail": "WordPress token request failed"}, status=400)
 
-    return JsonResponse({
-        "access_token": access_token,
-        "refresh_token": refresh_token
-    })
+    return JsonResponse({"access_token": access_token, "refresh_token": refresh_token})
 
 
 # --------------------------
@@ -128,42 +127,33 @@ class WordPressTokenViewSet(viewsets.ModelViewSet):
 
 
 # --------------------------
-# WordPress 포스트 업로드 함수
+# WordPress 유틸 함수
 # --------------------------
-def post_to_wordpress(access_token, title, content, media_id=None):
-    # 연결된 사이트 ID 확인
-    site_res_raw = requests.get(
-        "https://public-api.wordpress.com/rest/v1.1/me/sites",
-        headers={"Authorization": f"Bearer {access_token}"}
-    )
+def get_wordpress_site_id(access_token):
+    headers = {"Authorization": f"Bearer {access_token}"}
+    res = requests.get("https://public-api.wordpress.com/rest/v1.1/me/sites", headers=headers)
 
-    if site_res_raw.status_code != 200:
-        raise ValueError(f"WordPress API error: {site_res_raw.status_code} - {site_res_raw.text}")
+    if res.status_code != 200:
+        raise ValueError(f"WordPress API error: {res.status_code} - {res.text}")
 
-    site_res = site_res_raw.json()
-    if not site_res.get("sites"):
+    data = res.json()
+    if not data.get("sites"):
         raise ValueError("WordPress site not found")
 
-    site_id = site_res["sites"][0]["ID"]  # 첫 번째 사이트 선택
+    return data["sites"][0]["ID"]
 
-    post_data = {
-        "title": title,
-        "content": content,
-        "status": "publish"
-    }
 
+def post_to_wordpress(access_token, title, content, media_id=None):
+    site_id = get_wordpress_site_id(access_token)
+    post_data = {"title": title, "content": content, "status": "publish"}
     if media_id:
         post_data["media_ids"] = [media_id]
 
     url = f"https://public-api.wordpress.com/rest/v1.1/sites/{site_id}/posts/new"
-
-    res = requests.post(
-        url,
-        headers={"Authorization": f"Bearer {access_token}"},
-        json=post_data
-    )
+    res = requests.post(url, headers={"Authorization": f"Bearer {access_token}"}, json=post_data)
     res.raise_for_status()
     return res.json().get("URL")
+
 
 # --------------------------
 # Logbook → WordPress 포스트
@@ -172,29 +162,26 @@ class LogbookPostViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     @action(detail=False, methods=['post'])
-    @swagger_auto_schema(request_body=LogbookPostSerializer)
     def post_to_wp(self, request):
         serializer = LogbookPostSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         logbook_id = serializer.validated_data['logbook_id']
 
+        # 사용자 토큰 가져오기 (첫 번째)
         token_obj = WordPressToken.objects.filter(user=request.user).first()
         if not token_obj:
-            return Response(
-                {"detail": "워드프레스 계정으로 로그인 후 사용하세요."},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({"detail": "워드프레스 계정으로 로그인 후 사용하세요."},
+                            status=status.HTTP_403_FORBIDDEN)
+        access_token = token_obj.access_token.strip()
 
         logbook = get_object_or_404(Logbook, id=logbook_id, user=request.user)
 
+        # 이미지 업로드
         media_id = None
         if logbook.dive_image:
-            media_id = upload_image(
-                token_obj.access_token,
-                logbook.dive_image.path,
-                logbook.dive_image.name
-            )
+            media_id = upload_image(access_token, logbook.dive_image.path, logbook.dive_image.name)
 
+        # 글 작성
         title = logbook.dive_title
         content = f"""
         <h3>{logbook.dive_title}</h3>
@@ -214,9 +201,5 @@ class LogbookPostViewSet(viewsets.ViewSet):
         <p>{logbook.feeling}</p>
         """
 
-        post_url = post_to_wordpress(token_obj.access_token, title, content, media_id)
-
-        return Response(
-            {"wordpress_url": post_url},
-            status=status.HTTP_201_CREATED
-        )
+        post_url = post_to_wordpress(access_token, title, content, media_id)
+        return Response({"wordpress_url": post_url}, status=status.HTTP_201_CREATED)
