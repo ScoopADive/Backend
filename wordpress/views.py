@@ -132,11 +132,15 @@ class WordPressTokenViewSet(viewsets.ModelViewSet):
 # --------------------------
 def post_to_wordpress(access_token, title, content, media_id=None):
     # 연결된 사이트 ID 확인
-    site_res = requests.get(
+    site_res_raw = requests.get(
         "https://public-api.wordpress.com/rest/v1.1/me/sites",
         headers={"Authorization": f"Bearer {access_token}"}
-    ).json()
+    )
 
+    if site_res_raw.status_code != 200:
+        raise ValueError(f"WordPress API error: {site_res_raw.status_code} - {site_res_raw.text}")
+
+    site_res = site_res_raw.json()
     if not site_res.get("sites"):
         raise ValueError("WordPress site not found")
 
@@ -153,10 +157,13 @@ def post_to_wordpress(access_token, title, content, media_id=None):
 
     url = f"https://public-api.wordpress.com/rest/v1.1/sites/{site_id}/posts/new"
 
-    res = requests.post(url, headers={"Authorization": f"Bearer {access_token}"}, data=post_data)
+    res = requests.post(
+        url,
+        headers={"Authorization": f"Bearer {access_token}"},
+        json=post_data
+    )
     res.raise_for_status()
     return res.json().get("URL")
-
 
 # --------------------------
 # Logbook → WordPress 포스트
