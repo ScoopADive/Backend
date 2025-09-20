@@ -171,9 +171,8 @@ class LogbookPostViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         logbook_id = serializer.validated_data['logbook_id']
 
-        try:
-            token_obj = WordPressToken.objects.get(user=request.user)
-        except WordPressToken.DoesNotExist:
+        token_obj = WordPressToken.objects.filter(user=request.user).first()
+        if not token_obj:
             return Response(
                 {"detail": "워드프레스 계정으로 로그인 후 사용하세요."},
                 status=status.HTTP_403_FORBIDDEN
