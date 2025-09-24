@@ -7,6 +7,7 @@ class WordPressToken(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     access_token = models.TextField()
     refresh_token = models.TextField(null=True, blank=True)
+    expires_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
