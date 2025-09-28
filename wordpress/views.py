@@ -22,7 +22,7 @@ WP_REDIRECT_URI_SWAGGER = settings.WP_REDIRECT_URI_SWAGGER
 # 브라우저용 OAuth
 # --------------------------
 @api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([permissions.AllowAny])
 def wp_login(request):
     """브라우저용: WordPress OAuth 승인 페이지로 리다이렉트"""
     auth_url = (
@@ -35,7 +35,7 @@ def wp_login(request):
 
 
 @api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([permissions.AllowAny])
 def wp_callback(request):
     """브라우저용: OAuth 콜백 처리 후 DB 저장"""
     code = request.GET.get("code")
