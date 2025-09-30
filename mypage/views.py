@@ -5,9 +5,9 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from .models import BucketList, Friend, SkillSet
+from .models import BucketList, Friend, SkillSet, Preferences
 from .serializers import UserDetailSerializer, BucketListSerializer, UserUpdateSerializer, \
-    SkillSetSerializer
+    SkillSetSerializer, PreferencesSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 
 User = get_user_model()
-# Create your views here.
+
 class MyPageView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -31,6 +31,15 @@ class ListUsersView(APIView):
         users = User.objects.all()
         serializer = UserDetailSerializer(users, many=True)
         return Response(serializer.data)
+
+class PreferencesViewSet(viewsets.ModelViewSet):
+    queryset = Preferences.objects.all()
+    serializer_class = PreferencesSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Preferences.objects.filter(user=self.request.user)
+
 
 class BucketListViewSet(viewsets.ModelViewSet):
     queryset = BucketList.objects.all().order_by('created_at')

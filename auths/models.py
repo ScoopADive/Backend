@@ -40,6 +40,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=30)
     email = models.EmailField(verbose_name=_('email id'), max_length=64, unique=True, help_text='EMAIL ID.')
     country = models.CharField(max_length=20)
+
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,

@@ -2,12 +2,16 @@ from django.contrib.auth import get_user_model
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
-from rest_framework.response import Response
 
 from logbook.serializers import LogbookSerializer
-from mypage.models import BucketList, Friend, SkillSet
+from mypage.models import BucketList, Friend, SkillSet, Preferences
 
 User = get_user_model()
+
+class PreferencesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Preferences
+        fields = '__all__'
 
 class BucketListSerializer(serializers.ModelSerializer):
     class Meta:
