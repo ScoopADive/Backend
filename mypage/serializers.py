@@ -12,6 +12,7 @@ class PreferencesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Preferences
         fields = '__all__'
+        read_only_fields = ['user']
 
 class BucketListSerializer(serializers.ModelSerializer):
     class Meta:
