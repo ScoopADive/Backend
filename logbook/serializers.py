@@ -1,5 +1,4 @@
 from logbook.models import Comment
-# serializers.py
 from rest_framework import serializers
 from .models import Logbook, Equipment
 

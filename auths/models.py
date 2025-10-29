@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from auths.choices import License_Choices
+from mypage.models import Preferences
 
 
 class UserManager(BaseUserManager):

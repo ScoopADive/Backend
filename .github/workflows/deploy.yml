@@ -64,6 +64,9 @@ jobs:
             DB_PORT=${{ secrets.DB_PORT }}
 
             SECRET_KEY=${{ secrets.SECRET_KEY }}
+            
+            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+            
             EOF
 
             echo "==> 최신 이미지 Pull"

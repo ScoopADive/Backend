@@ -6,8 +6,8 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 
-from django.conf import settings
 from logbook.models import Logbook
+from scoopadive import settings
 from .models import WordPressToken
 from .serializers import WordPressTokenSerializer, LogbookPostSerializer
 from utils.wordpress import upload_image

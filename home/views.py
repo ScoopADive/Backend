@@ -9,7 +9,6 @@ from home.serializers import JobSerializer
 from logbook.models import Logbook
 
 
-# Create your views here.
 class TopLevelMembersListAPIView(APIView):
     permission_classes = [AllowAny]
 

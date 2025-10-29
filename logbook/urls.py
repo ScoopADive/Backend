@@ -5,6 +5,7 @@ from rest_framework import routers
 
 from .views import FriendLogbookAPIView
 
+app_name = 'logbook'
 router = routers.DefaultRouter()
 router.register(r'', views.LogbookViewSet, basename='logbook')
 urlpatterns = [

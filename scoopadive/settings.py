@@ -14,7 +14,6 @@ from pathlib import Path
 
 import environ
 import os
-from django.conf.global_settings import SECRET_KEY
 
 env = environ.Env(
     DEBUG=(bool, False),
@@ -34,13 +33,16 @@ SECRET_KEY = os.environ.get('SECRET_KEY') # 기본 사용방법
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # WordPress
 WP_CLIENT_ID = os.environ.get("WP_CLIENT_ID")
 WP_CLIENT_SECRET = os.environ.get("WP_CLIENT_SECRET")
 WP_REDIRECT_URI = os.environ.get("WP_REDIRECT_URI")
 WP_REDIRECT_URI_SWAGGER = os.environ.get("WP_REDIRECT_URI_SWAGGER")
+
+# OpenAI API
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', '13.125.160.47', 'localhost', 'www.scoopadive.com', 'scoopadive.com', 'web']
 
@@ -55,6 +57,7 @@ INSTALLED_APPS = [
     "home.apps.HomeConfig",
     "search.apps.SearchConfig",
     "wordpress.apps.WordpressConfig",
+    "ai.apps.AiConfig",
     # auths
     "rest_framework",
     # swagger
