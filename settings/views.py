@@ -7,6 +7,7 @@ from settings.serializers import PreferencesSerializer
 
 # Create your views here.
 class PreferencesViewSet(viewsets.ModelViewSet):
+    queryset = Preferences.objects.all()
     serializer_class = PreferencesSerializer
     permission_classes = [IsAuthenticated]
 
