@@ -63,6 +63,8 @@ urlpatterns = [
 
     path('api/ai/', include("ai.urls")),
 
+    path('api/settings/', include("settings.urls")),
+
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
 

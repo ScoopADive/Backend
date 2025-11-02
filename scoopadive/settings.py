@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "search.apps.SearchConfig",
     "wordpress.apps.WordpressConfig",
     "ai.apps.AiConfig",
+    "settings.apps.SettingsConfig",
     # auths
     "rest_framework",
     # swagger

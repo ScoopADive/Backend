@@ -4,7 +4,7 @@ from typing import List
 
 from django.conf import settings
 
-from mypage.models import Preferences
+from settings.models import Preferences
 
 OPENAI_API_KEY = settings.OPENAI_API_KEY
 

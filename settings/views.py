@@ -1,0 +1,16 @@
+from django.shortcuts import render
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+
+from settings.models import Preferences
+from settings.serializers import PreferencesSerializer
+
+
+# Create your views here.
+class PreferencesViewSet(viewsets.ModelViewSet):
+    queryset = Preferences.objects.all()
+    serializer_class = PreferencesSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Preferences.objects.filter(user=self.request.user)

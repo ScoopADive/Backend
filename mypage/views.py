@@ -4,10 +4,9 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
-
-from .models import BucketList, Friend, SkillSet, Preferences
+from .models import BucketList, Friend, SkillSet
 from .serializers import UserDetailSerializer, BucketListSerializer, UserUpdateSerializer, \
-    SkillSetSerializer, PreferencesSerializer
+    SkillSetSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -32,13 +31,6 @@ class ListUsersView(APIView):
         serializer = UserDetailSerializer(users, many=True)
         return Response(serializer.data)
 
-class PreferencesViewSet(viewsets.ModelViewSet):
-    queryset = Preferences.objects.all()
-    serializer_class = PreferencesSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Preferences.objects.filter(user=self.request.user)
 
 
 class BucketListViewSet(viewsets.ModelViewSet):
