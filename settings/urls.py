@@ -8,5 +8,5 @@ router = DefaultRouter()
 router.register('preferences', PreferencesViewSet, basename='preferences')
 
 urlpatterns = [
-    path('profile/', GetMyProfileView.as_view(), name='mypage_profile'),
+    path('profile/', PreferencesViewSet.as_view(), name='mypage_profile'),
 ]

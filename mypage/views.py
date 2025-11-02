@@ -118,14 +118,6 @@ class EditProfileView(APIView):
             return Response(UserDetailSerializer(user).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class GetMyProfileView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        # 로그인한 사용자 가져오기
-        user = request.user
-        serializer = UserDetailSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class MySkillsViewSet(viewsets.ModelViewSet):
     serializer_class = SkillSetSerializer

@@ -18,6 +18,5 @@ urlpatterns = [
 
     path('friends/detail/<int:id>/', FriendsDetailView.as_view(), name='friends-detail'),
     path('edit_profile/<int:id>/', EditProfileView.as_view(), name='mypage-edit'),
-
 ]
 
