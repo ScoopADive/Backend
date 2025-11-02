@@ -10,5 +10,8 @@ class PreferencesSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
 
     def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
+        user = self.context['request'].user
+        if user.is_anonymous:
+            raise serializers.ValidationError("Authentication required")
+        validated_data['user'] = user
         return super().create(validated_data)
