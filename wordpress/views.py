@@ -34,7 +34,7 @@ def wp_login(request):
     return redirect(auth_url)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'HEAD'])
 @permission_classes([permissions.AllowAny])
 def wp_callback(request):
     """브라우저용: OAuth 콜백 처리 후 DB 저장"""
