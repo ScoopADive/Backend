@@ -33,7 +33,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY') # 기본 사용방법
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # WordPress
 WP_CLIENT_ID = os.environ.get("WP_CLIENT_ID")
