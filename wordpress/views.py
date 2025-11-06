@@ -24,6 +24,9 @@ WP_REDIRECT_URI_SWAGGER = settings.WP_REDIRECT_URI_SWAGGER
 @api_view(['GET', 'HEAD'])
 @permission_classes([permissions.AllowAny])
 def wp_login(request):
+    from urllib.parse import quote
+    redirect_uri = quote(WP_REDIRECT_URI, safe='')
+    print(">>> WP_REDIRECT_URI =", WP_REDIRECT_URI)
     """브라우저용: WordPress OAuth 승인 페이지로 리다이렉트"""
     auth_url = (
         f"https://public-api.wordpress.com/oauth2/authorize?"
