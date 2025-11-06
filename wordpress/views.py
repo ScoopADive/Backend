@@ -45,6 +45,7 @@ def wp_callback(request):
     if not code:
         return JsonResponse({"detail": "WordPress OAuth code missing"}, status=400)
 
+    # WordPress에 토큰 요청
     res = requests.post(
         "https://public-api.wordpress.com/oauth2/token",
         data={
@@ -53,19 +54,30 @@ def wp_callback(request):
             "redirect_uri": WP_REDIRECT_URI,
             "code": code,
             "grant_type": "authorization_code",
-        }
+        },
     )
-    res.raise_for_status()
-    data = res.json()
 
+    if res.status_code != 200:
+        # WordPress에서 반환한 에러 그대로 보여줌
+        return JsonResponse({"detail": res.text}, status=res.status_code)
+
+    data = res.json()
     access_token = data.get("access_token")
     refresh_token = data.get("refresh_token")
-    if not access_token:
-        return JsonResponse({"detail": "WordPress token request failed"}, status=400)
 
-    # 기존 토큰 삭제 후 저장
-    WordPressToken.objects.filter(user=request.user).delete()
-    WordPressToken.objects.create(user=request.user, access_token=access_token, refresh_token=refresh_token)
+    if not access_token:
+        return JsonResponse({"detail": "WordPress token request failed", "data": data}, status=400)
+
+    user = request.user if request.user.is_authenticated else None
+
+    if user:
+        WordPressToken.objects.filter(user=user).delete()
+
+    WordPressToken.objects.create(
+        user=user,
+        access_token=access_token,
+        refresh_token=refresh_token
+    )
 
     return redirect("https://scoopadive.com/home")
 
