@@ -6,6 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
 
 from logbook.models import Logbook
 from scoopadive import settings
@@ -38,44 +39,60 @@ def wp_login(request):
     return redirect(auth_url)
 
 @api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([permissions.AllowAny])
 def wp_callback(request):
     code = request.GET.get("code")
-    print("Received code:", code)
+    raw_token = request.GET.get("token")
+
     if not code:
-        return JsonResponse({"detail": "Missing code"}, status=400)
+        return JsonResponse({"detail": "WordPress OAuth code missing"}, status=400)
 
-    res = requests.post(
-        "https://public-api.wordpress.com/oauth2/token",
-        data={
-            "client_id": settings.WP_CLIENT_ID,
-            "client_secret": settings.WP_CLIENT_SECRET,
-            "redirect_uri": settings.WP_REDIRECT_URI,
-            "code": code,
-            "grant_type": "authorization_code",
-        },
-        timeout=10
-    )
+    # 1️⃣ JWT 토큰으로 유저 인증
+    user = None
+    if raw_token:
+        try:
+            validated = AccessToken(raw_token)
+            user_id = validated.get("user_id")
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            user = User.objects.get(id=user_id)
+        except Exception as e:
+            print("JWT decode failed:", e)
+            user = None
 
-    print("Token response:", res.status_code, res.text)
+    if not user:
+        return JsonResponse({"detail": "User not authenticated (missing or invalid token)"}, status=401)
 
-    if res.status_code != 200:
-        return JsonResponse({"detail": "WordPress returned error", "response": res.json()}, status=res.status_code)
+    # 2️⃣ WordPress access_token 요청
+    try:
+        res = requests.post(
+            "https://public-api.wordpress.com/oauth2/token",
+            data={
+                "client_id": WP_CLIENT_ID,
+                "client_secret": WP_CLIENT_SECRET,
+                "redirect_uri": WP_REDIRECT_URI,
+                "code": code,
+                "grant_type": "authorization_code",
+            },
+            timeout=10
+        )
+        data = res.json()
+    except Exception as e:
+        return JsonResponse({"detail": f"Request failed: {str(e)}"}, status=500)
 
-    data = res.json()
     access_token = data.get("access_token")
-
     if not access_token:
-        return JsonResponse({"detail": "Missing access_token"}, status=400)
+        return JsonResponse({"detail": "WordPress returned error", "response": data}, status=400)
 
-    # 현재 로그인된 유저 기준
-    user = request.user
+    # 3️⃣ 저장 (기존 토큰 삭제 후 새로 생성)
+    from .models import WordPressToken
     WordPressToken.objects.update_or_create(
         user=user,
-        defaults={"access_token": access_token},
+        defaults={"access_token": access_token}
     )
 
-    return redirect("https://scoopadive.com/home")
+    # 4️⃣ 프론트로 리디렉션
+    return redirect(f"https://scoopadive.com/home?wordpress=connected")
 
 # --------------------------
 # Swagger용 OAuth
