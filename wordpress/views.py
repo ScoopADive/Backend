@@ -1,11 +1,9 @@
-import base64
 from urllib.parse import urlencode
 
 import requests
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import api_view, permission_classes, action
@@ -223,8 +221,32 @@ class LogbookPostViewSet(viewsets.ViewSet):
         if logbook.dive_image:
             media_id = upload_image(access_token, logbook.dive_image.path, logbook.dive_image.name)
 
-        title = logbook.dive_title
-        content = f"<h3>{logbook.dive_title}</h3>..."  # 기존 content 구성 그대로
+        # HTML 콘텐츠 구성
+        equipment_list = ', '.join(eq.name for eq in logbook.equipment.all())
+        buddy_info = logbook.buddy or 'N/A'
+        dive_center_name = logbook.dive_center.name if logbook.dive_center else 'N/A'
+        weather_info = logbook.weather or 'N/A'
+        dive_type_info = logbook.type_of_dive or 'N/A'
+
+        content = f"""
+        <h3>{logbook.dive_title}</h3>
+        <ul>
+          <li><b>날짜:</b> {logbook.dive_date}</li>
+          <li><b>장소:</b> {logbook.dive_site}</li>
+          <li><b>최대 수심:</b> {logbook.max_depth} m</li>
+          <li><b>바텀타임:</b> {str(logbook.bottom_time)}</li>
+          <li><b>버디:</b> {buddy_info}</li>
+          <li><b>날씨:</b> {weather_info}</li>
+          <li><b>다이브 타입:</b> {dive_type_info}</li>
+          <li><b>장비:</b> {equipment_list}</li>
+          <li><b>납 무게:</b> {logbook.weight} kg</li>
+          <li><b>탱크 압력:</b> {logbook.start_pressure} → {logbook.end_pressure}</li>
+          <li><b>다이브 센터:</b> {dive_center_name}</li>
+        </ul>
+        <p>{logbook.feeling or ''}</p>
+        """
+
+        title = logbook.dive_title  # WordPress 포스트 제목
 
         try:
             post_url = post_to_wordpress(access_token, title, content, media_id)
