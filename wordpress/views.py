@@ -1,3 +1,5 @@
+import base64
+
 import requests
 from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404
@@ -19,6 +21,7 @@ WP_CLIENT_SECRET = settings.WP_CLIENT_SECRET
 WP_REDIRECT_URI = settings.WP_REDIRECT_URI
 WP_REDIRECT_URI_SWAGGER = settings.WP_REDIRECT_URI_SWAGGER
 
+User = settings.AUTH_USER_MODEL
 
 # --------------------------
 # 브라우저용 OAuth
@@ -47,14 +50,19 @@ def wp_callback(request):
     if not code:
         return JsonResponse({"detail": "WordPress OAuth code missing"}, status=400)
 
-    # 1️⃣ JWT 토큰으로 유저 인증
     user = None
     if raw_token:
         try:
-            validated = AccessToken(raw_token)
+            # URL-safe base64로 인코딩된 JWT를 디코딩
+            try:
+                raw_token_bytes = base64.urlsafe_b64decode(raw_token + '==')  # 패딩 추가
+                raw_token_decoded = raw_token_bytes.decode('utf-8')
+            except Exception:
+                # 인코딩 안 된 일반 JWT일 수도 있음
+                raw_token_decoded = raw_token
+
+            validated = AccessToken(raw_token_decoded)
             user_id = validated.get("user_id")
-            from django.contrib.auth import get_user_model
-            User = get_user_model()
             user = User.objects.get(id=user_id)
         except Exception as e:
             print("JWT decode failed:", e)
@@ -63,7 +71,7 @@ def wp_callback(request):
     if not user:
         return JsonResponse({"detail": "User not authenticated (missing or invalid token)"}, status=401)
 
-    # 2️⃣ WordPress access_token 요청
+    # WordPress access_token 요청
     try:
         res = requests.post(
             "https://public-api.wordpress.com/oauth2/token",
@@ -84,16 +92,14 @@ def wp_callback(request):
     if not access_token:
         return JsonResponse({"detail": "WordPress returned error", "response": data}, status=400)
 
-    # 3️⃣ 저장 (기존 토큰 삭제 후 새로 생성)
-    from .models import WordPressToken
+    # 기존 토큰 삭제 후 새로 저장
     WordPressToken.objects.update_or_create(
         user=user,
         defaults={"access_token": access_token}
     )
 
-    # 4️⃣ 프론트로 리디렉션
+    # 프론트로 리디렉션
     return redirect(f"https://scoopadive.com/home?wordpress=connected")
-
 # --------------------------
 # Swagger용 OAuth
 # --------------------------
