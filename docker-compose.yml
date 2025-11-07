@@ -34,7 +34,7 @@ services:
       - /home/ubuntu/Frontend/dist:/usr/share/nginx/html:ro
       - static_volume:/scoopadive/staticfiles
     depends_on:
-      - scoopadive_web
+      - web
     networks:
       - scoopadive_network
 
