@@ -1,4 +1,5 @@
 import base64
+from urllib.parse import urlencode
 
 import requests
 from django.http import JsonResponse
@@ -29,17 +30,22 @@ User = settings.AUTH_USER_MODEL
 @api_view(['GET', 'HEAD'])
 @permission_classes([permissions.AllowAny])
 def wp_login(request):
-    from urllib.parse import quote
-    redirect_uri = quote(WP_REDIRECT_URI, safe='')
-    print(">>> WP_REDIRECT_URI =", WP_REDIRECT_URI)
-    """브라우저용: WordPress OAuth 승인 페이지로 리다이렉트"""
-    auth_url = (
-        f"https://public-api.wordpress.com/oauth2/authorize?"
-        f"client_id={WP_CLIENT_ID}&response_type=code"
-        f"&redirect_uri={WP_REDIRECT_URI}"
-        f"&scope=global posts"
-    )
+    # JWT 가져오기 (프론트에서 전달 받음)
+    raw_token = request.GET.get("token") or request.GET.get("state", "")
+
+    # OAuth authorize URL 구성
+    params = {
+        "client_id": WP_CLIENT_ID,
+        "response_type": "code",
+        "redirect_uri": WP_REDIRECT_URI,
+        "scope": "global posts",
+        "state": raw_token,  # JWT 전달
+        "token": raw_token,  # 백엔드 호환용
+    }
+    auth_url = f"https://public-api.wordpress.com/oauth2/authorize?{urlencode(params)}"
+    print(">>> auth_url =", auth_url)
     return redirect(auth_url)
+
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
