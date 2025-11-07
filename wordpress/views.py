@@ -1,6 +1,7 @@
 import requests
 from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import api_view, permission_classes, action
@@ -36,7 +37,7 @@ def wp_login(request):
     )
     return redirect(auth_url)
 
-
+@csrf_exempt
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def wp_callback(request):
