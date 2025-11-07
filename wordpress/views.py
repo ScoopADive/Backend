@@ -42,7 +42,7 @@ def wp_login(request):
 @permission_classes([permissions.AllowAny])
 def wp_callback(request):
     code = request.GET.get("code")
-    raw_token = request.GET.get("token")
+    raw_token = request.GET.get("token") or request.GET.get("state")
 
     if not code:
         return JsonResponse({"detail": "WordPress OAuth code missing"}, status=400)
