@@ -37,41 +37,51 @@ def wp_login(request):
     return redirect(auth_url)
 
 
-@api_view(["GET"])
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
 def wp_callback(request):
+    code = request.GET.get("code")
+    print("wp_callback code:", code)
+    if not code:
+        return JsonResponse({"detail": "WordPress OAuth code missing"}, status=400)
+
     try:
-        code = request.GET.get("code")
-        print("OAuth callback triggered with code:", code)
-
-        if not code:
-            return JsonResponse({"error": "Missing code"}, status=400)
-
-        # --- WordPress 토큰 요청 ---
-        token_url = "https://public-api.wordpress.com/oauth2/token"
-        data = {
-            "client_id": settings.WP_CLIENT_ID,
-            "client_secret": settings.WP_CLIENT_SECRET,
-            "redirect_uri": settings.WP_REDIRECT_URI,
-            "grant_type": "authorization_code",
-            "code": code,
-        }
-
-        print("Sending request to WordPress token endpoint...")
-        resp = requests.post(token_url, data=data, timeout=10)
-        print("Response status:", resp.status_code)
-        print("Response text:", resp.text[:300])
-
-        if resp.status_code != 200:
-            return JsonResponse({"error": "WordPress token exchange failed"}, status=resp.status_code)
-
-        token_data = resp.json()
-        return JsonResponse(token_data)
-
+        res = requests.post(
+            "https://public-api.wordpress.com/oauth2/token",
+            data={
+                "client_id": WP_CLIENT_ID,
+                "client_secret": WP_CLIENT_SECRET,
+                "redirect_uri": WP_REDIRECT_URI,
+                "code": code,
+                "grant_type": "authorization_code",
+            },
+            timeout=10
+        )
+        data = res.json()
     except Exception as e:
-        import traceback
-        print("🔥 Exception in wp_callback:", e)
-        traceback.print_exc()
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"detail": f"Request failed: {str(e)}"}, status=500)
+
+    print("WordPress token response:", data)
+
+    if res.status_code != 200 or "access_token" not in data:
+        return JsonResponse({
+            "detail": f"WordPress returned {res.status_code}",
+            "response": data
+        }, status=res.status_code)
+
+    access_token = data.get("access_token")
+    user = request.user if request.user.is_authenticated else None
+
+    if user:
+        WordPressToken.objects.filter(user=user).delete()
+
+    WordPressToken.objects.create(
+        user=user,
+        access_token=access_token,
+    )
+
+    print("WordPress token saved successfully.")
+    return redirect("https://scoopadive.com/home")
 
 # --------------------------
 # Swagger용 OAuth
