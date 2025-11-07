@@ -37,53 +37,44 @@ def wp_login(request):
     )
     return redirect(auth_url)
 
-@csrf_exempt
 @api_view(['GET'])
-@permission_classes([permissions.AllowAny])
+@permission_classes([permissions.IsAuthenticated])
 def wp_callback(request):
     code = request.GET.get("code")
-    print("wp_callback code:", code)
-
+    print("Received code:", code)
     if not code:
-        return JsonResponse({"detail": "WordPress OAuth code missing"}, status=400)
+        return JsonResponse({"detail": "Missing code"}, status=400)
 
-    #WordPress로 토큰 요청
-    try:
-        res = requests.post(
-            "https://public-api.wordpress.com/oauth2/token",
-            data={
-                "client_id": WP_CLIENT_ID,
-                "client_secret": WP_CLIENT_SECRET,
-                "redirect_uri": WP_REDIRECT_URI,
-                "code": code,
-                "grant_type": "authorization_code",
-            },
-            timeout=10,
-        )
-        data = res.json()
-    except Exception as e:
-        return JsonResponse({"detail": f"Request failed: {str(e)}"}, status=500)
+    res = requests.post(
+        "https://public-api.wordpress.com/oauth2/token",
+        data={
+            "client_id": settings.WP_CLIENT_ID,
+            "client_secret": settings.WP_CLIENT_SECRET,
+            "redirect_uri": settings.WP_REDIRECT_URI,
+            "code": code,
+            "grant_type": "authorization_code",
+        },
+        timeout=10
+    )
 
-    #에러 응답 처리
+    print("Token response:", res.status_code, res.text)
+
     if res.status_code != 200:
-        return JsonResponse({"detail": f"WordPress returned {res.status_code}", "response": data}, status=res.status_code)
+        return JsonResponse({"detail": "WordPress returned error", "response": res.json()}, status=res.status_code)
 
+    data = res.json()
     access_token = data.get("access_token")
+
     if not access_token:
-        return JsonResponse({"detail": "access_token missing", "data": data}, status=400)
+        return JsonResponse({"detail": "Missing access_token"}, status=400)
 
-    #로그인된 유저만 허용
-    user = request.user if request.user.is_authenticated else None
-    if not user:
-        return JsonResponse({"detail": "You must be logged in via Google first."}, status=403)
+    # 현재 로그인된 유저 기준
+    user = request.user
+    WordPressToken.objects.update_or_create(
+        user=user,
+        defaults={"access_token": access_token},
+    )
 
-    #기존 토큰 삭제 후 새로 저장
-    WordPressToken.objects.filter(user=user).delete()
-    WordPressToken.objects.create(user=user, access_token=access_token)
-
-    print(f"[WordPressToken] Stored for user {user.username}")
-
-    #저장 후 리디렉트
     return redirect("https://scoopadive.com/home")
 
 # --------------------------
