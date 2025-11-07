@@ -75,8 +75,10 @@ def wp_callback(request):
         return JsonResponse({"detail": "access_token missing", "data": data}, status=400)
 
     user = request.user if request.user.is_authenticated else None
+
     if user:
         WordPressToken.objects.filter(user=user).delete()
+
     WordPressToken.objects.create(user=user, access_token=access_token, refresh_token=refresh_token)
 
     return redirect("https://scoopadive.com/home")
