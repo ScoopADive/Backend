@@ -40,10 +40,8 @@ def wp_login(request):
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def wp_callback(request):
-    print(">>> CALLBACK HIT", flush=True)
-    return JsonResponse({"status": "hit"})
-
     code = request.GET.get("code")
+    print("wp_callback code: ", code)
     if not code:
         return JsonResponse({"detail": "WordPress OAuth code missing"}, status=400)
 
