@@ -2,6 +2,7 @@ import base64
 from urllib.parse import urlencode
 
 import requests
+from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -22,7 +23,7 @@ WP_CLIENT_SECRET = settings.WP_CLIENT_SECRET
 WP_REDIRECT_URI = settings.WP_REDIRECT_URI
 WP_REDIRECT_URI_SWAGGER = settings.WP_REDIRECT_URI_SWAGGER
 
-User = settings.AUTH_USER_MODEL
+User = get_user_model()
 
 # --------------------------
 # 브라우저용 OAuth
