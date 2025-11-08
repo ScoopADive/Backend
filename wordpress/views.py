@@ -2,7 +2,7 @@ from urllib.parse import urlencode
 
 import requests
 from django.contrib.auth import get_user_model
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, permissions, status
@@ -100,8 +100,20 @@ def wp_callback(request):
         defaults={"access_token": access_token, "refresh_token": data.get("refresh_token")}
     )
 
-    return redirect(f"https://scoopadive.com/home?wordpress=connected")
-# --------------------------
+    html = """
+    <script>
+      if (window.opener) {
+        window.opener.postMessage({ wordpressConnected: true }, window.location.origin);
+        window.close();
+      } else {
+        window.location.href = '/';
+      }
+    </script>
+    """
+
+    return HttpResponse(html)
+
+
 # Swagger용 OAuth
 # --------------------------
 @api_view(['GET'])
