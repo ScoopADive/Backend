@@ -100,15 +100,39 @@ def wp_callback(request):
         defaults={"access_token": access_token, "refresh_token": data.get("refresh_token")}
     )
 
-    html = """
-    <script>
-      if (window.opener) {
-        window.opener.postMessage({ wordpressConnected: true }, window.location.origin);
-        window.close();
-      } else {
-        window.location.href = '/';
-      }
-    </script>
+    # --------- 여기부터 중요: 팝업 닫는 HTML 응답 ---------
+    # 부모 SPA와 동일한 origin 문자열 생성
+    origin = ('https://' if request.is_secure() else 'http://') + request.get_host()
+
+    html = f"""
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Connecting...</title>
+      </head>
+      <body>
+        <script>
+          (function() {{
+            try {{
+              if (window.opener && !window.opener.closed) {{
+                // 부모창(React SPA)로 WordPress 연결 완료 신호 전송
+                window.opener.postMessage(
+                  {{ type: 'WP_OAUTH_DONE', wordpressConnected: true }},
+                  '{origin}'
+                );
+              }}
+            }} catch (e) {{
+              // console.log(e);
+            }}
+            // 무조건 팝업 닫기 시도
+            try {{
+              window.close();
+            }} catch (e) {{}}
+          }})();
+        </script>
+      </body>
+    </html>
     """
 
     return HttpResponse(html)
