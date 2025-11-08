@@ -22,14 +22,14 @@ class SpotsExtractionList(BaseModel):
 class CustomPrompt():
     def __init__(self, user):
         self.user = user
+        self.preferences = None
         if user is not None:
-            preferences = Preferences.objects.get(user=user)
-            self.preferences = preferences
+            self.preferences = Preferences.objects.filter(user=user).first()
         self.prompt = ""
 
     def run_prompt(self):
         # 유저 정보가 주어지지 않았을 때
-        if self.user is None:
+        if self.user is None or self.preferences is None:
             self.prompt = "I am a beginner. Not experienced in Scuba Diving, so I need to start from the scratch."
         # 유저 정보가 주어지지 않았을 때
         else:
