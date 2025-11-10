@@ -230,6 +230,14 @@ LOGIN_REDIRECT_URL = '/'
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = [
+    "https://scoopadive.com",
+    "https://www.scoopadive.com",
+]
+SESSION_COOKIE_DOMAIN = ".scoopadive.com"
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_DOMAIN = ".scoopadive.com"
+CSRF_COOKIE_SECURE = True
 
 ROOT_URLCONF = "scoopadive.urls"
 
