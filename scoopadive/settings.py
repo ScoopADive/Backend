@@ -239,6 +239,13 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_DOMAIN = ".scoopadive.com"
 CSRF_COOKIE_SECURE = True
 
+# SameSite 설정
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "Lax"
+
+# 세션/로그인 만료 등
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+
 ROOT_URLCONF = "scoopadive.urls"
 
 TEMPLATES = [
