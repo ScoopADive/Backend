@@ -16,3 +16,4 @@ __pycache__/
 # Visualized Graphviz Files
 *.dot
 *.png
+swagger.html
