@@ -44,7 +44,7 @@ WP_REDIRECT_URI_SWAGGER = os.environ.get("WP_REDIRECT_URI_SWAGGER")
 # OpenAI API
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
-ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', '13.125.160.47', 'localhost', 'www.scoopadive.com', 'scoopadive.com', 'web']
+ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', '13.125.160.47', 'localhost', 'www.scoopadive.com', 'scoopadive.com', 'web', 'api.scoopadive.com']
 
 AUTH_USER_MODEL = 'auths.User'
 # Application definition
@@ -229,6 +229,8 @@ SOCIALACCOUNT_PROVIDERS = {
 LOGIN_REDIRECT_URL = '/'
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = ["https://scoopadive.com", "https://www.scoopadive.com", "https://api.scoopadive.com"]
+
 CSRF_TRUSTED_ORIGINS = [
     "https://scoopadive.com",
     "https://www.scoopadive.com",
