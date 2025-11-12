@@ -32,15 +32,17 @@ class SpotsRecommendView(APIView):
         return Response({"message": "Spots updated"}, status=201)
 
 
+from asgiref.sync import async_to_sync
+
 class AsyncSpotsRecommendView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
+    async def post(self, request):
         # SPOT 전부 초기화 (POST 자체만으로 새로 프롬프트를 날려 스팟 정보를 초기화 하겠다는 뜻임)
         # POST 는 사용자가 본인의 Preferences를 업데이트할 시에만 하는 것으로 하든, 아니면 주기적으로 (ex 세번 접속시) 업데이트 하는 것으로 함
         Spot.objects.filter(user_id=request.user.id).delete()
-        spots = AsyncCustomPrompt(request.user).async_openai_request()
+        spots = async_to_sync(AsyncCustomPrompt(request.user).async_openai_request)()
 
         for s in spots:
             Spot.objects.create(
@@ -51,7 +53,6 @@ class AsyncSpotsRecommendView(APIView):
             )
 
         return Response({"message": "Spots updated"}, status=201)
-
 
 
 class SpotView(APIView):
