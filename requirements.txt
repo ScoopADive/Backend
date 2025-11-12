@@ -18,5 +18,10 @@ Pillow
 django-cors-headers
 cryptography
 python-decouple
+aiohttpPillow
+django-cors-headers
+cryptography
+python-decouple
 openai
 pydantic
+aiohttp
