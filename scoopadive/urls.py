@@ -61,7 +61,7 @@ urlpatterns = [
 
     path('api/wordpress/', include("wordpress.urls")),
 
-    path('api/ai/', include("ai.urls")),
+    path('api/recommend/', include("recommend.urls")),
 
     path('api/settings/', include("settings.urls")),
 

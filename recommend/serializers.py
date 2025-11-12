@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ai.models import Spot
+from recommend.models import Spot
 
 
 class SpotSerializer(serializers.ModelSerializer):

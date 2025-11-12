@@ -57,7 +57,7 @@ INSTALLED_APPS = [
     "home.apps.HomeConfig",
     "search.apps.SearchConfig",
     "wordpress.apps.WordpressConfig",
-    "ai.apps.AiConfig",
+    "recommend.apps.RecommendConfig",
     "settings.apps.SettingsConfig",
     # auths
     "rest_framework",
