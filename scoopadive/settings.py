@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     "wordpress.apps.WordpressConfig",
     "recommend.apps.RecommendConfig",
     "settings.apps.SettingsConfig",
+    "photo.apps.PhotoConfig",
     # auths
     "rest_framework",
     # swagger
