@@ -35,6 +35,29 @@ SECRET_KEY = os.environ.get('SECRET_KEY') # 기본 사용방법
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# AWS S3
+# 환경변수에서 가져오기 (Docker, CI/CD 환경 모두 안전)
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "my-django-app-images")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "ap-northeast-2")
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+
+# S3에 업로드 시 기본 스토리지 백엔드로 사용
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+# S3의 파일 URL 구성
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+
+# (선택) 캐시 제어 등 추가 설정
+AWS_S3_FILE_OVERWRITE = False  # 같은 이름 파일 덮어쓰기 방지
+AWS_DEFAULT_ACL = None         # 퍼블릭 ACL 경고 제거용
+AWS_QUERYSTRING_AUTH = False   # URL에 ?AWSAccessKeyID=... 붙는 것 방지
+
+# Django의 MEDIA 관련 설정
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 # WordPress
 WP_CLIENT_ID = os.environ.get("WP_CLIENT_ID")
 WP_CLIENT_SECRET = os.environ.get("WP_CLIENT_SECRET")
@@ -65,6 +88,9 @@ INSTALLED_APPS = [
     'drf_yasg',
     # cors
     'corsheaders',
+
+    # S3 버킷 연동
+    'storages',
 
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
