@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from photo.views import PhotoViewSet
 
 router = DefaultRouter()
-router.register('', PhotoViewSet)
+router.register(r'', PhotoViewSet, basename='photo')
 
 urlpatterns = [
     path('', include(router.urls)),
