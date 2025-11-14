@@ -32,4 +32,4 @@ COPY . /scoopadive/
 
 EXPOSE 8000
 
-CMD ["gunicorn", "scoopadive.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "scoopadive.wsgi:application", "-k","uvicorn.workers.UvicornWorker", "--workers", "1","--bind", "0.0.0.0:8000"]
