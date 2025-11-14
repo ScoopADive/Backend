@@ -51,6 +51,25 @@ class LogbookViewSet(viewsets.ModelViewSet):
         ]
         return Response(data)
 
+    @action(detail=False, methods=['get'])
+    async def likes_async(self, request):
+        # ORM은 아직 sync → thread 실행 필요
+        from asgiref.sync import sync_to_async
+
+        async_get_likes = sync_to_async(
+            lambda: [
+                {
+                    'id': logbook.id,
+                    'likes': list(logbook.likes.values_list('username', flat=True))
+                }
+                for logbook in Logbook.objects.all().prefetch_related("likes")
+            ],
+            thread_sensitive=True
+        )
+
+        data = await async_get_likes()
+        return Response(data)
+
     @action(detail=True, methods=['get', 'post', 'delete'])
     def like(self, request, pk=None):
         log = self.get_object()
