@@ -2,7 +2,7 @@ import uuid
 import boto3
 from django.conf import settings
 from rest_framework import viewsets
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 
 from photo.models import Photo
@@ -14,8 +14,8 @@ class PhotoViewSet(viewsets.ModelViewSet):
     queryset = Photo.objects.all().order_by('-uploaded_at')
     serializer_class = PhotoSerializer
 
-    @api_view(['GET'])
-    def generate_presigned_url(request):
+    @action(detail=False, methods=['get'], url_path='generate_presigned_url')
+    def generate_presigned_url(self, request):
         file_name = request.GET.get('filename')
         file_type = request.GET.get('filetype')
 
