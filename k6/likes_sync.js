@@ -3,6 +3,11 @@ import { check } from "k6";
 
 const BASE = "https://scoopadive.com";
 
+export let options = {
+    vus: 10,         // 동시에 10명
+    duration: "30s", // 30초 동안 반복
+};
+
 export default function () {
   // 1️⃣ 로그인
   const loginPayload = JSON.stringify({
