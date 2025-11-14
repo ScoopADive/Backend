@@ -1,36 +1,28 @@
 import http from "k6/http";
-import { check, sleep } from "k6";
-
-export let options = {
-    vus: 50,
-    duration: "45s",
-};
+import { check } from "k6";
 
 const BASE = "https://scoopadive.com";
 
 export default function () {
+  // 1️⃣ 로그인
+  const loginPayload = JSON.stringify({
+    email: "ruby@gmail.com",
+    password: "12345678"
+  });
 
-    // 1) 로그인
-    const login = http.post(
-        `${BASE}/api/auths/login/`,
-        JSON.stringify({
-            email: "ruby@gmail.com",
-            password: "12345678",
-        }),
-        { headers: { "Content-Type": "application/json" } }
-    );
+  const loginHeaders = { "Content-Type": "application/json" };
+  const loginRes = http.post(`${BASE}/api/auths/signin`, loginPayload, { headers: loginHeaders });
 
-    const token = login.json("access");
+  check(loginRes, { "login succeeded": (r) => r.status === 200 });
 
-    // 2) sync API 호출
-    const res = http.get(`${BASE}/api/logbooks/likes/`, {
-        headers: { Authorization: `Bearer ${token}` },
-    });
+  const accessToken = loginRes.json("access");
 
-    check(res, {
-        "status 200": (r) => r.status === 200,
-    });
+  // 2️⃣ API 요청
+  const apiHeaders = {
+    "Authorization": `Bearer ${accessToken}`,
+  };
 
-    sleep(0.3);
+  const res = http.get(`${BASE}/api/logbooks/likes/`, { headers: apiHeaders });
+
+  check(res, { "status was 200": (r) => r.status === 200 });
 }
-
