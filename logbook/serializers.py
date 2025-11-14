@@ -5,7 +5,7 @@ from .models import Logbook, Equipment
 class LogbookSerializer(serializers.ModelSerializer):
     liked_by_current_user = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
-    dive_image_url = serializers.URLField(required=False, allow_blank=True)
+    dive_image_url = serializers.URLField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         model = Logbook
