@@ -16,7 +16,7 @@ export default function () {
     });
 
     const loginHeaders = { "Content-Type": "application/json" };
-    const loginRes = http.post(`${BASE}/api/auths/signin`, loginPayload, { headers: loginHeaders });
+    const loginRes = http.post(`${BASE}/api/auths/signin/`, loginPayload, { headers: loginHeaders });
 
     if (loginRes.status !== 200) {
         console.error("Login failed!");
