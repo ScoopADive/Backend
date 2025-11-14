@@ -22,7 +22,7 @@ class DiveCenter(models.Model):
 class Logbook(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='own_logbooks')
     dive_image = models.ImageField(upload_to='logbooks_images', null=True, blank=True)
-    dive_image_url = models.URLField(max_length=500, blank=True, null=True)
+    dive_image_url = models.CharField(max_length=1000, blank=True, null=True)
     feeling = models.TextField(null=True, blank=True)
     # buddy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='buddy_logbooks')
     buddy = models.TextField(null=True, blank=True)

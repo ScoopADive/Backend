@@ -4,7 +4,7 @@ from .models import Photo
 
 class PhotoSerializer(serializers.ModelSerializer):
 
-    image_url = serializers.URLField(
+    image_url = serializers.CharField(
         required=False,
         allow_blank=True,
         allow_null=True
