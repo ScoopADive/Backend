@@ -9,7 +9,7 @@ services:
       sh -c "
       python manage.py collectstatic --noinput &&
       python manage.py migrate &&
-      gunicorn scoopadive.asgi:application -k uvicorn.workers.UvicornWorker --workers 8 --bind 0.0.0.0:8000
+      gunicorn scoopadive.asgi:application -k uvicorn.workers.UvicornWorker --workers 4 --bind 0.0.0.0:8000
       "
     env_file:
       - .env
@@ -19,8 +19,29 @@ services:
       - static_volume:/scoopadive/staticfiles
     depends_on:
       - db
+      - redis
     networks:
       - scoopadive_network
+
+  worker:
+    image: junnie082/scoopadive:latest
+    container_name: celery_worker
+    command: celery -A scoopadive worker --loglevel=info --concurrency=4
+    env_file: .env
+    depends_on:
+      - web
+      - redis
+    networks:
+      - scoopadive_network
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - scoopadive_network
+
 
   nginx:
     image: nginx:latest

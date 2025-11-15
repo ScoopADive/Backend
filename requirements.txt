@@ -24,3 +24,5 @@ aiohttp
 django-storages[boto3]
 boto3
 uvicorn
+celery
+celery[redis]

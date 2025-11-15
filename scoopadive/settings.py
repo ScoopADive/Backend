@@ -72,6 +72,16 @@ ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', '13.125.160.47', 'localhost', 'www.scoo
 AUTH_USER_MODEL = 'auths.User'
 # Application definition
 
+# Celery
+# Redis 브로커 사용
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Seoul'
+
 INSTALLED_APPS = [
     "logbook.apps.LogbookConfig",
     "auths.apps.AuthsConfig",
