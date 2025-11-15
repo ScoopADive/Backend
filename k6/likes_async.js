@@ -1,38 +1,37 @@
-import http from "k6/http";
+import http from "k6/http";                                                                                      GRJ, Arg
 import { check, sleep } from "k6";
 
-const BASE = "https://scoopadive.com";  // 실제 서버 주소
+const BASE = "https://scoopadive.com";                                                                           2025-11-
 
 export let options = {
-    vus: 10,         // 동시에 10명 가상 사용자
-    duration: "30s", // 30초 동안 테스트
+        vus: 50,
+        duration: "30s",
 };
 
-export default function () {
-    // 1️⃣ 로그인
-    const loginPayload = JSON.stringify({
-        email: "ruby@gmail.com",
-        password: "12345678"
-    });
+export function setup() {
+        const loginPayload = JSON.stringify({
+                email: "ruby@gmail.com",
+                password: "12345678"
+        });
 
-    const loginHeaders = { "Content-Type": "application/json" };
-    const loginRes = http.post(`${BASE}/api/auths/signin/`, loginPayload, { headers: loginHeaders });
+        const loginHeaders = { "Content-Type": "application/json" };
+        const loginRes = http.post(`${BASE}/api/auths/signin/`, loginPayload, { headers: loginHeaders });
 
-    if (loginRes.status !== 200) {
-        console.error("Login failed!");
-        return;
-    }
+        check(loginRes, { "login succeeded": (r) => r.status === 200 && r.json("access") !== undefined });                                                                                                                gentina'
 
-    const accessToken = loginRes.json("access"); // 서버 JSON 구조에 맞게 조정
+        const token = loginRes.json("access");
+        return { token };
+}                                                                                                                GRJ, Arg
 
-    // 2️⃣ likes_async API 요청
-    const apiHeaders = {
-        "Authorization": `Bearer ${accessToken}`,
-    };
+export default function (data) {
+        const apiHeaders = {                                                                             2025-11-
+                "Authorization": `Bearer ${data.token}`,
+                "Content-Type": "application/json"
+        };
 
-    const res = http.get(`${BASE}/api/logbooks/likes_async/`, { headers: apiHeaders });
+        const res = http.get(`${BASE}/api/logbooks/likes_async/`, { headers: apiHeaders });
 
-    check(res, { "status was 200": (r) => r.status === 200 });
+        check(res, { "status was 200": (r) => r.status === 200 });                                       gentina'
 
-    sleep(1); // 1초 쉬고 다음 반복
+        sleep(1);
 }
