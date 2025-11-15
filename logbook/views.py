@@ -14,6 +14,12 @@ from auths.models import User
 from logbook.models import Logbook, Comment
 from .serializers import LogbookSerializer, LogbookLikeSerializer, CommentSerializer
 
+# Redis cache
+from django.core.cache import cache
+# Async 처리
+from asgiref.sync import sync_to_async
+# Celery Task
+from .tasks import add_like_task, remove_like_task
 
 class LogbookViewSet(viewsets.ModelViewSet):
     queryset = Logbook.objects.all().order_by('-dive_date')
@@ -44,13 +50,18 @@ class LogbookViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def likes(self, request):
-        data = [
-            {
-                'id': logbook.id,
-                'likes': list(logbook.likes.values_list('username', flat=True))
-            }
-            for logbook in self.queryset if logbook.likes.exists()
-        ]
+        cache_key = "logbook_likes" # 캐시 키 정의
+        data = cache.get(cache_key)  # 캐시에서 먼저 조회
+        if not data:
+            data = [
+                {
+                    'id': logbook.id,
+                    'likes': list(logbook.likes.values_list('username', flat=True))
+                }
+                for logbook in Logbook.objects.all().prefetch_related("likes")
+                if logbook.likes.exists()
+            ]
+            cache.set(cache_key, data, timeout=60)  # Redis 캐시에 저장 (1분)
         return Response(data)
 
     @action(detail=True, methods=['get', 'post', 'delete'])
@@ -66,14 +77,16 @@ class LogbookViewSet(viewsets.ModelViewSet):
             })
 
         elif request.method == 'POST':
-            log.likes.add(user)
+            # 좋아요 작업을 Celery Task로 비동기 처리
+            add_like_task.delay(log.id, user.id)
             return Response({
                 'liked': True,
                 'likes_count': log.likes.count()
             }, status=status.HTTP_200_OK)
 
         elif request.method == 'DELETE':
-            log.likes.remove(user)
+            # 좋아요 삭제를 Celery Task로 비동기 처리
+            remove_like_task.delay(log.id, user.id)
             return Response({
                 'liked': False,
                 'likes_count': log.likes.count()
@@ -84,17 +97,25 @@ class LikesAsyncView(APIView):
     permission_classes = [IsAuthenticated]
 
     async def get(self, request):
-        async_get_likes = sync_to_async(
-            lambda: [
-                {
-                    'id': logbook.id,
-                    'likes': list(logbook.likes.values_list("username", flat=True))
-                }
-                for logbook in Logbook.objects.all().prefetch_related("likes")
-            ],
-            thread_sensitive=True
-        )
-        data = await async_get_likes()
+        cache_key = "logbook_likes" # 캐시 키 정의
+        data = await sync_to_async(cache.get)(cache_key)  # async-safe 캐시 조회
+
+        if not data:
+            # DB 조회를 async-safe로 감싸기
+            async_get_likes = sync_to_async(
+                lambda: [
+                    {
+                        'id': logbook.id,
+                        'likes': list(logbook.likes.values_list("username", flat=True))
+                    }
+                    for logbook in Logbook.objects.all().prefetch_related("likes")
+                    if logbook.likes.exists()
+                ],
+                thread_sensitive=True
+            )
+            data = await async_get_likes()
+            await sync_to_async(cache.set)(cache_key, data, 60)  # <- async-safe 캐시 저장
+
         return Response(data)
 
 class FriendLogbookAPIView(APIView):
