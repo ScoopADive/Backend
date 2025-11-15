@@ -26,3 +26,4 @@ boto3
 uvicorn
 celery
 celery[redis]
+django-redis
