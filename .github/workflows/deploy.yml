@@ -72,6 +72,9 @@ jobs:
             SECRET_KEY=${{ secrets.SECRET_KEY }}
             
             OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+
+            FISHIAL_CLIENT_ID=${{ secrets.FISHIAL_CLIENT_ID }}
+            FISHIAL_CLIENT_SECRET=${{ secrets.FISHIAL_CLIENT_SECRET }}
             
             EOF
 
