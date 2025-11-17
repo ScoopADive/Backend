@@ -135,11 +135,12 @@ class PhotoViewSet(viewsets.ModelViewSet):
             headers = direct_upload.get("headers", {})
 
             # 4️⃣ Direct Upload to S3
-            put_headers = {
-                "Content-Disposition": headers.get("Content-Disposition"),
-                "Content-MD5": headers.get("Content-MD5"),
-                "Content-Type": "",  # 반드시 비워두기
-            }
+            put_headers = {}
+            if "Content-Disposition" in headers:
+                put_headers["Content-Disposition"] = headers["Content-Disposition"]
+            if "Content-MD5" in headers:
+                put_headers["Content-MD5"] = headers["Content-MD5"]
+
             put_resp = requests.put(upload_url, headers=put_headers, data=file_bytes)
             put_resp.raise_for_status()
 
