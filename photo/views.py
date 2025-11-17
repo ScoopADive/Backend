@@ -1,6 +1,9 @@
 import hashlib
 import base64
 import mimetypes
+import uuid
+
+import boto3
 import requests
 
 from django.conf import settings
@@ -57,9 +60,44 @@ class FishialClient:
         return r.json()
 
 
+ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif"]
+
+
 class PhotoViewSet(viewsets.ModelViewSet):
     queryset = Photo.objects.all().order_by('-uploaded_at')
     serializer_class = PhotoSerializer
+
+    @action(detail=False, methods=['get'], url_path='generate_presigned_url')
+    def generate_presigned_url(self, request):
+        file_name = request.GET.get('filename')
+        file_type = request.GET.get('filetype')
+
+        if file_type not in ALLOWED_TYPES:
+            return Response({"error": "Invalid file type"}, status=400)
+
+        # 중복 방지 UUID
+        key = f"uploads/{uuid.uuid4().hex}_{file_name}"
+
+        s3 = boto3.client(
+            's3',
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_S3_REGION_NAME
+        )
+
+        presigned_url = s3.generate_presigned_url(
+            'put_object',
+            Params={
+                'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+                'Key': key,
+                'ContentType': file_type,
+            },
+            ExpiresIn=3600  # 1시간
+        )
+
+        file_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{key}"
+
+        return Response({'uploadUrl': presigned_url, 'fileUrl': file_url})
 
     @action(detail=True, methods=['post'], url_path='classify')
     def classify(self, request, pk=None):
@@ -109,6 +147,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
             result = client.recognize(token, signed_id)
 
             photo.classified_as = result["fishial_result"]["results"][0]["species"][0]["name"]
+            photo.save()
 
             return Response({
                 "photo_id": photo.id,
