@@ -144,15 +144,23 @@ class PhotoViewSet(viewsets.ModelViewSet):
             put_resp = requests.put(upload_url, headers=put_headers, data=file_bytes)
             put_resp.raise_for_status()
 
-            # 5️⃣ Fishial Recognition
+            # 5️⃣ Fishial Recognition (안전하게 처리)
             result = client.recognize(token, signed_id)
 
-            photo.classified_as = result["fishial_result"]["results"][0]["species"][0]["name"]
+            results = result.get("results", [])
+            if results and results[0].get("species"):
+                species_list = results[0]["species"]
+                best_match = max(species_list, key=lambda x: x.get("accuracy", 0))
+                photo.classified_as = best_match.get("name", "Unknown")
+            else:
+                photo.classified_as = "Unknown"
+
             photo.save()
 
             return Response({
                 "photo_id": photo.id,
                 "image_url": photo.image_url,
+                "classified_as": photo.classified_as,
                 "fishial_result": result
             })
 
@@ -164,4 +172,5 @@ class PhotoViewSet(viewsets.ModelViewSet):
                 detail = str(resp.text) if resp else str(e)
             return Response({"detail": "Fishial API error", "error": detail}, status=status.HTTP_502_BAD_GATEWAY)
         except Exception as e:
-            return Response({"detail": "Internal server error", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"detail": "Internal server error", "error": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
