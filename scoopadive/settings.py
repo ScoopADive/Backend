@@ -35,6 +35,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY') # 기본 사용방법
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
 # AWS S3
 # 환경변수에서 가져오기 (Docker, CI/CD 환경 모두 안전)
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
@@ -66,6 +67,14 @@ WP_REDIRECT_URI_SWAGGER = os.environ.get("WP_REDIRECT_URI_SWAGGER")
 
 # OpenAI API
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+
+# FISHIAL
+FISHIAL_CLIENT_ID = os.environ.get("FISHIAL_CLIENT_ID")      # 예: "c0fae..."
+FISHIAL_CLIENT_SECRET = os.environ.get("FISHIAL_CLIENT_SECRET")
+FISHIAL_AUTH_URL = "https://api-users.fishial.ai/v1/auth/token"
+FISHIAL_UPLOAD_URL = "https://api.fishial.ai/v1/recognition/upload"
+FISHIAL_RECOGNITION_URL = "https://api.fishial.ai/v1/recognition/image"
+
 
 ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', '13.125.160.47', 'localhost', 'www.scoopadive.com', 'scoopadive.com', 'web', 'api.scoopadive.com']
 

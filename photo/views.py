@@ -9,6 +9,8 @@ from photo.models import Photo
 from photo.serializers import PhotoSerializer
 
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif"]
+import requests
+from django.conf import settings
 
 class PhotoViewSet(viewsets.ModelViewSet):
     queryset = Photo.objects.all().order_by('-uploaded_at')
@@ -45,3 +47,55 @@ class PhotoViewSet(viewsets.ModelViewSet):
         file_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{key}"
 
         return Response({'uploadUrl': presigned_url, 'fileUrl': file_url})
+
+
+    @action(detail=True, methods=['post'], url_path='classify')
+    def classify(self, request, pk=None):
+        try:
+            photo = Photo.objects.get(pk=pk)
+        except Photo.DoesNotExist:
+            return Response({"error": "Photo not found"}, status=404)
+
+        if not photo.image_url:
+            return Response({"error": "image_url is empty"}, status=400)
+
+        client = FishClient()
+
+        try:
+            result = client.classify(photo.image_url)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+        return Response({
+            "photo_id": photo.id,
+            "image_url": photo.image_url,
+            "fishial_result": result
+        })
+
+class FishClient:
+    def __init__(self):
+        self.client_id = settings.FISHIAL_CLIENT_ID
+        self.client_secret = settings.FISHIAL_CLIENT_SECRET
+        self.auth_url = "https://api-users.fishial.ai/v1/auth/token"
+        self.identify_url = "https://api.fishial.ai/v1/recognition/image"
+
+    def get_token(self):
+        r = requests.post(self.auth_url, json={
+            "client_id": self.client_id,
+            "client_secret": self.client_secret
+        })
+        r.raise_for_status()
+        return r.json()["access_token"]
+
+    def classify(self, img_url: str):
+        token = self.get_token()
+
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+        payload = {"url": img_url}
+
+        r = requests.post(self.identify_url, json=payload, headers=headers)
+        r.raise_for_status()
+        return r.json()
