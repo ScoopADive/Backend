@@ -87,6 +87,14 @@ class PhotoViewSet(viewsets.ModelViewSet):
             upload_resp = client.request_signed_upload(token, filename, content_type, byte_size, checksum)
             signed_id = upload_resp["signed-id"]
 
+            print("#### FISHIAL #####")
+            print("Token:", token)
+            print("Signed ID:", signed_id)
+            print("Checksum:", checksum)
+            print("Byte size:", byte_size)
+            print("#################")
+
+
             # Fishial 인식 호출
             result = client.recognize(token, signed_id)
 
