@@ -108,6 +108,8 @@ class PhotoViewSet(viewsets.ModelViewSet):
             # 5️⃣ Fishial Recognition
             result = client.recognize(token, signed_id)
 
+            photo.classified_as = result["fishial_result"]["results"][0]["species"][0]["name"]
+
             return Response({
                 "photo_id": photo.id,
                 "image_url": photo.image_url,
