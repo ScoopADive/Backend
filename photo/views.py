@@ -27,6 +27,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
         client = FishialClient()
         try:
             token = client.get_token()
+            print('Fishial token: ', token)
             # S3 URL 기반 Fishial upload
             # 메타데이터 계산
             filename = photo.image_url.split("/")[-1]
@@ -42,19 +43,21 @@ class PhotoViewSet(viewsets.ModelViewSet):
             file_bytes = r.content
             byte_size = len(file_bytes)
             checksum = base64.b64encode(hashlib.md5(file_bytes).digest()).decode()
+            print('Fishial checksum: ', checksum)
 
             # 1) signed-id 발급
             upload_resp = client.request_signed_upload(token, filename, content_type, byte_size, checksum)
+            print('Fishial upload response: ', upload_resp)
             signed_id = upload_resp["signed-id"]
 
             # 2) Fishial recognition 호출
             result = client.recognize(token, signed_id)
 
-            return Response({
-                "photo_id": photo.id,
+            return Response({                "photo_id": photo.id,
                 "image_url": photo.image_url,
                 "fishial_result": result
             })
+
 
         except requests.HTTPError as e:
             resp = getattr(e, "response", None)
