@@ -15,3 +15,4 @@ def remove_like_task(logbook_id, user_id):
     log.likes.remove(user_id)  # DB에서 좋아요 제거
     cache.delete("logbook_likes")  # 캐시 무효화
 
+
