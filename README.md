@@ -1,3 +1,3 @@
 # Backend
 
-![scoopadive_stack (2) (1).png](../../Downloads/scoopadive_stack%20%282%29%20%281%29.png)
+<img width="4865" height="1971" alt="scoopadive_stack_readme" src="https://github.com/user-attachments/assets/1d763476-7b90-4879-b021-7438478ffcad" />
