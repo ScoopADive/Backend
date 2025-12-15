@@ -1,0 +1,19 @@
+db.sqlite3
+.env
+secrets.json
+
+# Python 관련 캐시 파일들
+__pycache__/
+*.pyc
+*.pyo
+
+# Django Migrations — init 파일은 포함하고, 나머지만 제외
+**/migrations/*.pyc
+**/migrations/*.pyo
+**/migrations/__pycache__/
+!**/migrations/__init__.py
+
+# Visualized Graphviz Files
+*.dot
+*.png
+swagger.html

@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+
+  web:
+    image: junnie082/scoopadive:latest
+    container_name: scoopadive_web
+    command: >
+      sh -c "
+      python manage.py collectstatic --noinput &&
+      python manage.py migrate &&
+      gunicorn scoopadive.asgi:application -k uvicorn.workers.UvicornWorker --workers 4 --bind 0.0.0.0:8000
+      "
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - static_volume:/scoopadive/staticfiles
+    depends_on:
+      - db
+      - redis
+    networks:
+      - scoopadive_network
+
+  worker:
+    image: junnie082/scoopadive:latest
+    container_name: celery_worker
+    command: celery -A scoopadive worker --loglevel=info --concurrency=4
+    env_file: .env
+    depends_on:
+      - web
+      - redis
+    networks:
+      - scoopadive_network
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - scoopadive_network
+
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /home/ubuntu/Backend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /home/ubuntu/Frontend/dist:/usr/share/nginx/html:ro
+      - static_volume:/scoopadive/staticfiles
+    depends_on:
+      - web
+    networks:
+      - scoopadive_network
+
+  db:
+    image: postgres:13
+    container_name: scoopadive_db
+    environment:
+      POSTGRES_DB: "${DB_NAME}"
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - scoopadive_network
+
+volumes:
+  postgres_data:
+  static_volume:
+
+networks:
+  scoopadive_network:
